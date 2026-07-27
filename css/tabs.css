@@ -1,0 +1,67 @@
+div.tabs
+{
+	text-align: center;
+
+	padding: 10px;
+	float: left;
+	width: 50%;
+
+	box-sizing: border-box;
+}
+
+div.tabs a
+{
+	transition: 0.25s ease-in;
+	text-decoration: none;
+	padding-left: 6px;
+	padding-right: 6px;
+	margin: 5px;
+	color: darkblue;
+}
+
+div.tabs a:hover
+{
+	background-color: lightgreen;
+}
+
+center
+{
+	margin-top: 250px;
+	margin-bottom: 250px;
+}
+
+table
+{
+	border-collapse: collapse;
+	text-align: center;
+
+	min-width: 90%;
+	margin: auto;
+}
+
+table td, table th
+{
+	border: 1px solid black;
+}
+
+table tr:first-child th
+{
+	border-top: 0;
+}
+
+table tr:last-child td
+{
+	border-bottom: 0;
+}
+
+table tr td:first-child,
+table tr th:first-child
+{
+	border-left: 0;
+}
+
+table tr td:last-child,
+table tr th:last-child
+{
+	border-right: 0;
+}

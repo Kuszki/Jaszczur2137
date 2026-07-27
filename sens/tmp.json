@@ -1,0 +1,5 @@
+{
+	"name": "Temperatura",
+	"unit": "℃",
+	"format": "%0.1f %s"
+}

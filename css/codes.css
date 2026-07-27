@@ -1,0 +1,111 @@
+table
+{
+	width: 100%;
+}
+
+tr > *
+{
+	vertical-align: top;
+}
+
+menu.help
+{
+	float: right;
+
+	left: unset;
+	right: 0px;
+	top: 0px;
+
+	width: max-content+25px;
+	white-space: nowrap;
+}
+
+menu.help > nav > *
+{
+	float: right;
+	text-align: right;
+}
+
+menu.help > nav > a
+{
+	padding-right: 15px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.CodeMirror
+{
+	border: 1px solid lightgray;
+	max-width: 100%;
+	min-height: 150px;
+	width: 100%;
+	height: 150px;
+	resize: vertical;
+}
+
+.CodeMirror.error
+{
+	border: 1px solid red;
+}
+
+.cm-comment
+{
+	color: orange;
+	font-style: italic;
+}
+
+.cm-number
+{
+	color: darkgreen;
+}
+
+.cm-keyword
+{
+	color: pink;
+	font-weight: bold;
+}
+
+.cm-atom
+{
+	color: darkblue;
+	font-weight: bold;
+}
+
+.cm-def
+{
+	color: blue;
+	font-weight: bold;
+}
+
+.cm-variable
+{
+	color: black;
+	font-weight: bold;
+}
+
+.cm-operator
+{
+	color: darkred;
+	font-weight: bold;
+}
+
+.cm-bracket
+{
+	color: darkred;
+	font-weight: bold;
+}
+
+.error
+{
+	color: red;
+}
+
+.errors 
+{
+	align-items: center;
+	justify-content: center;
+	color: red;
+	font-weight: bold;
+	margin: 5px;
+}
+

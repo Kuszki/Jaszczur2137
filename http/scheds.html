@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+		<meta http-equiv="Content-Language" content="pl">
+		<meta name="Author" content='Łukasz "Kuszki" Dróżdż'>
+
+		<link rel="stylesheet" type="text/css" href="codemirror.css.gz">
+
+		<link rel="stylesheet" type="text/css" href="main.css"/>
+		<link rel="stylesheet" type="text/css" href="jobs.css"/>
+		<link rel="stylesheet" type="text/css" href="codes.css"/>
+
+		<title>Sterownik Jaszczur-2137: Harmonogram</title>
+
+		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+		<script> window.jQuery || document.write("<script src='jquery.js.gz'><\/script>"); </script>
+
+		<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.min.js"></script>
+		<script> window.CodeMirror || document.write('<script src="codemirror.js.gz"><\/script>'); </script>
+
+		<script src="main.js"></script>
+		<script src="scheds.js"></script>
+		<script src="script.js"></script>
+
+		<script> $(document).ready(onLoad); </script>
+
+	</head>
+	<body>
+
+		<header>
+			<p>Harmonogram sterownika Jaszczur-2137</p>
+			<nav>
+				<a href="https://github.com/Kuszki/Jaszczur-2137">Github</a>
+			</nav>
+		</header>
+
+		<menu>
+			<nav>
+				<p>Urządzenie</p>
+				<a href="index.html">Status</a>
+				<a href="logs.html">Historia</a>
+				<a href="info.html">Informacje</a>
+				<p>Preferencje</p>
+				<a href="tasks.html">Zadania</a>
+				<a href="prefs.html">Ustawienia</a>
+				<a href="scheds.html">Harmonogram</a>
+				<p>Harmonogram</p>
+				<a href="javascript:void(0)" onclick="onCheck()">Sprawdź</a>
+				<a href="javascript:void(0)" onclick="onSave()">Zapisz</a>
+				<a href="javascript:void(0)" onclick="onReset()">Przywróć</a>
+			</nav>
+		</menu>
+
+		<menu class="help">
+			<nav id="vars"></nav>
+		</menu>
+
+		<section id="schedules">
+			<p>Harmonogram</p>
+			<div id="scheds"></div>
+		</section>
+
+		<footer id="toast"></footer>
+
+	</body>
+</html>

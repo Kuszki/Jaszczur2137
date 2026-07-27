@@ -1,0 +1,1 @@
+{"name": "Test", "code": "22:00 >= t >= 20:37                              # twoja\n     or                                          # stara\n         iif(dupa > 6.9, (tmp * 3) > 25, hum)    # to\n     and                                         # tw\u00f3j\n         1/5                                     # stary", "driver": 1, "default": 0}

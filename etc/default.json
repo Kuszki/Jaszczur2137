@@ -1,0 +1,10 @@
+{
+	"tzone":	1,
+	"loop":	30,
+	"sync":	30,
+	"psize":	72,
+	"page":	3,
+	"ptime":	60,
+	"lsize":	25,
+	"lage":	3,
+}

@@ -1,0 +1,59 @@
+table
+{
+	border: 0;
+	margin-left: 50px;
+	margin-right: auto;
+	text-align: left;
+}
+
+label
+{
+	margin-left: 25px;
+}
+
+td > *
+{
+	height: 100%;
+	vertical-align: middle;
+}
+
+section > p
+{
+	margin-right: auto;
+	padding: 10px;
+}
+
+table tr td:first-child,
+table tr th:first-child
+{
+	width: 75px;
+}
+
+input, select
+{
+	margin-left: 5px;
+}
+
+input[type=checkbox]
+{
+	display: none!important;
+}
+
+input[type=checkbox] + label
+{
+
+	background: lightgray;
+
+	padding: 3px;
+
+	text-align: center;
+	cursor: pointer;
+	margin-left: 5px;
+}
+
+input[type=checkbox]:checked + label
+{
+	background: green;
+	color: white;
+}
+

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+		<meta http-equiv="Content-Language" content="pl">
+		<meta name="Author" content='Łukasz "Kuszki" Dróżdż'>
+
+		<link rel="stylesheet" type="text/css" href="main.css"/>
+		<link rel="stylesheet" type="text/css" href="logs.css"/>
+
+		<title>Sterownik Jaszczur-2137: Historia</title>
+
+		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+		<script> window.jQuery || document.write("<script src='jquery.js.gz'><\/script>"); </script>
+
+		<script src="main.js"></script>
+		<script src="logs.js"></script>
+
+		<script> $(document).ready(onLoad); </script>
+
+	</head>
+	<body>
+
+		<header>
+			<p>Dziennik sterownika Jaszczur-2137</p>
+			<nav>
+				<a href="https://github.com/Kuszki/Jaszczur-2137">Github</a>
+			</nav>
+		</header>
+
+		<menu>
+			<nav>
+				<p>Urządzenie</p>
+				<a href="index.html">Status</a>
+				<a href="logs.html">Historia</a>
+				<a href="info.html">Informacje</a>
+				<p>Preferencje</p>
+				<a href="tasks.html">Zadania</a>
+				<a href="prefs.html">Ustawienia</a>
+				<a href="scheds.html">Harmonogram</a>
+				<p>Historia</p>
+				<a href="javascript:void(0)" onclick="onSave()">Zapisz</a>
+				<a href="javascript:void(0)" onclick="onClear()">Wyczyść</a>
+			</nav>
+		</menu>
+
+		<section id="history">
+			<div id="log"></div>
+		</section>
+
+		<footer id="toast"></footer>
+
+	</body>
+</html>

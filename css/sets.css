@@ -1,0 +1,97 @@
+table
+{
+	border: 0;
+	width: 700px;
+	max-width: 60%;
+	margin-left: 50px;
+	margin-right: auto;
+	text-align: left;
+	transition: all 1s linear 0s;
+}
+
+td > *
+{
+	width: 100%;
+}
+
+table tr td:first-child,
+table tr th:first-child
+{
+	width: 55%;
+}
+
+table.on
+{
+	opacity: 1;
+	visibility: visible;
+}
+
+table.off
+{
+	opacity: 0;
+	visibility: hidden;
+}
+
+table.hide
+{
+	opacity: 0;
+	visibility: hidden;
+	display: none;
+}
+
+td::after
+{
+	position: relative;
+	display: inline-block;
+	direction: rtl;
+	right: 25px;
+	width: 0;
+	font-size: 90%;
+}
+
+td.min::after
+{
+	content: 'minuty';
+}
+
+td.sec::after
+{
+	content: 'sekundy';
+}
+
+td.day::after
+{
+	content: 'dni';
+}
+
+td.pkt::after
+{
+	content: 'próbki';
+}
+
+td.rec::after
+{
+	content: 'wpisy';
+}
+
+td.utc::after
+{
+	content: 'UTC';
+}
+
+td.stc::after
+{
+	content: '℃';
+}
+
+section > form > p
+{
+	transition: 0.25s ease-in;
+	margin-right: auto;
+	padding: 10px;
+}
+
+section > form > p:hover
+{
+	background-color: lightgreen;
+}

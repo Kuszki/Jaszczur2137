@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+		<meta http-equiv="Content-Language" content="pl">
+		<meta name="Author" content='Łukasz "Kuszki" Dróżdż'>
+
+		<link rel="stylesheet" type="text/css" href="main.css"/>
+		<link rel="stylesheet" type="text/css" href="sets.css"/>
+
+		<title>Sterownik Jaszczur-2137: Ustawienia</title>
+
+		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+		<script> window.jQuery || document.write("<script src='jquery.js.gz'><\/script>"); </script>
+
+		<script src="main.js"></script>
+		<script src="prefs.js"></script>
+
+		<script> $(document).ready(onLoad); </script>
+
+	</head>
+	<body>
+
+		<header>
+			<p>Ustawienia sterownika Jaszczur-2137</p>
+			<nav>
+				<a href="https://github.com/Kuszki/Jaszczur-2137">Github</a>
+			</nav>
+		</header>
+
+		<menu>
+			<nav>
+				<p>Urządzenie</p>
+				<a href="index.html">Status</a>
+				<a href="logs.html">Historia</a>
+				<a href="info.html">Informacje</a>
+				<p>Preferencje</p>
+				<a href="tasks.html">Zadania</a>
+				<a href="prefs.html">Ustawienia</a>
+				<a href="scheds.html">Harmonogram</a>
+				<p>Ustawienia</p>
+				<a href="javascript:void(0)" onclick="onSave()">Zapisz</a>
+				<a href="javascript:void(0)" onclick="onReset()">Przywróć</a>
+				<a href="javascript:void(0)" onclick="onDefault()">Domyślne</a>
+				<p>Sterownik</p>
+				<a href="javascript:void(0)" onclick="onReboot()">Restart</a>
+			</nav>
+		</menu>
+
+		<section id="preferences"><form id="prefs">
+			<p onclick="onExpand('tim')">Ustawienia czasu</p>
+			<table id="tim" class="on">
+				<tr>
+					<td><label for="loop">Interwał pętli sterowania</label></td>
+					<td><input class="sec" type="number" id="loop" name="loop" min="5" max="60" step="1" required></td>
+				</tr>
+				<tr>
+					<td><label for="sync">Interwał synchronizacji czasu</label></td>
+					<td><input class="min" type="number" id="sync" name="sync" min="5" max="360" required></td>
+				</tr>
+				<tr>
+					<td><label for="tzone">Strefa czasowa</label></td>
+					<td><input class="utc" type="number" id="tzone" name="tzone" min="-12" max="14" required></td>
+				</tr>
+			</table>
+			<p onclick="onExpand('his')">Ustawienia historii</p>
+			<table id="his" class="hide">
+				<tr>
+					<td><label for="ptime">Odstępy czasu na wykresie</label></td>
+					<td><input class="min" type="number" id="ptime" name="psize" min="15" max="180" required></td>
+				</tr>
+				<tr>
+					<td><label for="page">Liczba dni na wykresie</label></td>
+					<td><input class="day" type="number" id="page" name="page" min="1" max="5" required></td>
+				</tr>
+				<tr>
+					<td><label for="lsize">Liczba pozycji w historii</label></td>
+					<td><input class="rec" type="number" id="lsize" name="lsize" min="10" max="100" required></td>
+				</tr>
+				<tr>
+					<td><label for="lage">Liczba dni historii</label></td>
+					<td><input class="day" type="number" id="lage" name="lage" min="1" max="10" required></td>
+				</tr>
+			</table>
+		</form></section>
+
+		<footer id="toast"></footer>
+
+	</body>
+	<script>
+		$("td:has(input.sec)").addClass("sec");
+		$("td:has(input.min)").addClass("min");
+		$("td:has(input.day)").addClass("day");
+		$("td:has(input.rec)").addClass("rec");
+		$("td:has(input.utc)").addClass("utc");
+	</script>
+</html>

@@ -1,0 +1,74 @@
+{
+	"type": "line",
+	"data":
+	{
+		"datasets": []
+	},
+	"options":
+	{
+		"responsive": true,
+		"scales":
+		{
+			"xAxes":
+			[{
+				"type": "time",
+				"time":
+				{
+					"unit": "hour",
+					"tooltipFormat": "LLL",
+					"displayFormats":
+					{
+						"hour": "HH:mm"
+					}
+				}
+			},
+			{
+				"type": "time",
+				"time":
+				{
+					"unit": "day",
+					"displayFormats":
+					{
+						"day": "D MMMM"
+					}
+				}
+			}],
+			"yAxes": []
+		},
+		"pan":
+		{
+			"enabled": true,
+			"mode": "x",
+			"rangeMin":
+			{
+				"x": null,
+				"y": null
+			},
+			"rangeMax":
+			{
+				"x": null,
+				"y": null
+			}
+		},
+		"zoom":
+		{
+			"enabled": true,
+			"mode": "x",
+			"rangeMin":
+			{
+				"x": null,
+				"y": null
+			},
+			"rangeMax":
+			{
+				"x": null,
+				"y": null
+			}
+		},
+		"tooltips": {
+			"callbacks": {
+			    "label": null
+			}
+		}
+	}
+}

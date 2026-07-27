@@ -1,0 +1,50 @@
+table
+{
+	border: 0;
+	margin-left: 50px;
+	margin-right: auto;
+	text-align: left;
+	transition: all 1s linear 0s;
+}
+
+td > *
+{
+	width: 100%;
+}
+
+table tr td:first-child,
+table tr th:first-child
+{
+	width: 125px;
+}
+
+table.on
+{
+	opacity: 1;
+	visibility: visible;
+}
+
+table.off
+{
+	opacity: 0;
+	visibility: hidden;
+}
+
+table.hide
+{
+	opacity: 0;
+	visibility: hidden;
+	display: none;
+}
+
+section > div > p
+{
+	transition: 0.25s ease-in;
+	margin-right: auto;
+	padding: 10px;
+}
+
+section > div > p:hover
+{
+	background-color: lightgreen;
+}

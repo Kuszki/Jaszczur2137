@@ -1,0 +1,161 @@
+*
+{
+	box-sizing: border-box;
+}
+
+body
+{
+	margin-top: 85px;
+}
+
+menu
+{
+	float: left;
+
+	position: fixed;
+
+	padding-left: 15px;
+	padding-right: 10px;
+	padding-top: 80px;
+	padding-bottom: 15px;
+
+	left: 0px;
+	top: 0px;
+
+	width: 175px;
+	height: 100%;
+}
+
+menu > nav
+{
+	width: 100%;
+	height: 100%;
+
+	overflow: auto;
+}
+
+menu > nav > *
+{
+	padding: 10px;
+	width: 90%;
+
+	clear: both;
+	float: left;
+}
+
+menu > nav > a
+{
+	transition: 0.25s ease-in;
+	text-decoration: none;
+	color: darkblue;
+}
+
+menu > nav > p
+{
+	padding-left: 0;
+	padding-bottom: 0;
+}
+
+menu > nav > a:hover
+{
+	background-color: lightgreen;
+}
+
+header
+{
+	position: fixed;
+	z-index: 1;
+
+	left: 0;
+	top: 0;
+
+	width: 100%;
+	height: 75px;
+
+	background-color: lightyellow;
+}
+
+header > nav
+{
+	float: right;
+}
+
+header > nav > *
+{
+	padding: inherit;
+	display: inline-block;
+}
+
+header > nav > a
+{
+	background-color: inherit;
+	text-decoration: none;
+	color: darkblue;
+	transition: 0.25s ease-in;
+}
+
+header > nav > a:hover
+{
+	background-color: burlywood;
+}
+
+header > *
+{
+	float: left;
+	padding: 15px 25px 10px;
+}
+
+section
+{
+	margin-left: auto;
+	margin-right: auto;
+
+	max-width: 60%;
+	padding: 10px;
+
+	text-align: justify;
+}
+
+th, td
+{
+	padding: 5px;
+}
+
+footer
+{
+	visibility: hidden;
+	min-width: 300px;
+	margin-left: -160px;
+	background-color: black;
+	color: white;
+	text-align: center;
+	padding: 20px;
+	position: fixed;
+	left: 50%;
+	bottom: 50px;
+	border-radius: 5px;
+}
+
+footer.show
+{
+	visibility: visible;
+	animation: fadein 1s;
+}
+
+footer.hide
+{
+	visibility: visible;
+	animation: fadeout 1s;
+}
+
+@keyframes fadein
+{
+  from { bottom: 0; opacity: 0; }
+  to { bottom: 50px; opacity: 1; }
+}
+
+@keyframes fadeout
+{
+  from { bottom: 50px; opacity: 1; }
+  to { bottom: 0; opacity: 0; }
+}

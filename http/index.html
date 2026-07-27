@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+		<meta http-equiv="Content-Language" content="pl">
+		<meta name="Author" content='Łukasz "Kuszki" Dróżdż'>
+
+		<link rel="stylesheet" type="text/css" href="main.css"/>
+		<link rel="stylesheet" type="text/css" href="tabs.css"/>
+
+		<title>Sterownik Jaszczur-2137: Status</title>
+
+		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+		<script> window.jQuery || document.write("<script src='jquery.js.gz'><\/script>"); </script>
+
+		<script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+		<script> window.moment || document.write('<script src="moment.js.gz"><\/script>') </script>
+
+		<script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/locale/pl.min.js"></script>
+		<script> window.moment.locale() == "pl" || document.write('<script src="moment.pl.js.gz"><\/script>') </script>
+
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+		<script> window.Chart || document.write('<script src="chart.js.gz"><\/script>') </script>
+
+		<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+		<script> window.Hammer || document.write('<script src="hammer.js.gz"><\/script>') </script>
+
+		<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"></script>
+		<script> window.ChartZoom || document.write('<script src="chart.zoom.js.gz"><\/script>') </script>
+
+		<script src="main.js"></script>
+		<script src="index.js"></script>
+
+		<script> $(document).ready(onLoad); </script>
+
+	</head>
+	<body>
+
+		<header>
+			<p>Status sterownika Jaszczur-2137</p>
+			<nav>
+				<a href="https://github.com/Kuszki/Jaszczur-2137">Github</a>
+			</nav>
+		</header>
+
+		<menu>
+			<nav>
+				<p>Urządzenie</p>
+				<a href="index.html">Status</a>
+				<a href="logs.html">Historia</a>
+				<a href="info.html">Informacje</a>
+				<p>Preferencje</p>
+				<a href="tasks.html">Zadania</a>
+				<a href="prefs.html">Ustawienia</a>
+				<a href="scheds.html">Harmonogram</a>
+				<p>Sterowanie</p>
+				<a href="javascript:void(0)" onclick="onEnable('all', 1)">Włącz</a>
+				<a href="javascript:void(0)" onclick="onEnable('all', 0)">Wyłącz</a>
+				<a href="javascript:void(0)" onclick="onDriver('all', 1)">Auto</a>
+			</nav>
+		</menu>
+
+		<section id="graph">
+			<canvas id="plot"></canvas>
+		</section>
+
+		<section min-height="400px">
+			<div id="sensors" class="tabs"></div>
+			<div id="outputs" class="tabs"></div>
+		</section>
+
+		<footer id="toast"></footer>
+
+	</body>
+</html>

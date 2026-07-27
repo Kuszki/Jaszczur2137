@@ -1,0 +1,86 @@
+cd /
+mrm .*
+
+md /arch
+cd /arch
+mrm .*
+
+md /http
+cd /http
+mrm .*
+
+md /lib
+cd /lib
+mrm .*
+
+md /css
+cd /css
+mrm .*
+
+md /etc
+cd /etc
+mrm .*
+
+md /src
+cd /src
+mrm .*
+
+md /obj
+cd /obj
+mrm .*
+
+md /var
+cd /var
+mrm .*
+
+cd /
+mrm .*
+
+put arch/chart.js.gz
+put arch/chart.zoom.js.gz
+put arch/hammer.js.gz
+put arch/jquery.js.gz
+put arch/moment.js.gz
+put arch/moment.pl.js.gz
+
+put lib/server.mpy
+put lib/driver.mpy
+put lib/potent.mpy
+put lib/netconf.mpy
+put lib/requests.mpy
+
+put http/index.html
+put http/scheds.html
+put http/tasks.html
+put http/prefs.html
+put http/logs.html
+put http/info.html
+
+put css/main.css
+put css/tabs.css
+put css/sets.css
+put css/jobs.css
+put css/logs.css
+put css/info.css
+
+put src/index.js
+put src/scheds.js
+put src/tasks.js
+put src/prefs.js
+put src/logs.js
+put src/main.js
+put src/info.js
+
+put etc/network.json
+put etc/default.json
+put etc/driver.json
+put etc/etags.json
+put etc/users.json
+put etc/plot.json
+put etc/plan.json
+put etc/jobs.json
+
+put obj/favicon.ico
+
+put server.py main.py
+put boot.py boot.py

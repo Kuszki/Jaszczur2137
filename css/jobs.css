@@ -26,7 +26,7 @@ section > p
 table tr td:first-child,
 table tr th:first-child
 {
-	width: 75px;
+	width: 175px;
 }
 
 input, select

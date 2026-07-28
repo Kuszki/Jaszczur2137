@@ -67,20 +67,24 @@ class output:
 
 	def driver(self): return self.drv
 
+	def id(self): return self.uid
+
 	def name(self): return self.nam
 
 	def changed(self): return self.cha
+
+	def default(self): return self.vde
 
 	def script(self): return self.code.script()
 
 	def dump(self): return {
 
-			'uid': self.uid,
+			'uid': self.id(),
 			'name': self.name(),
 			'status': self.status(),
 			'code': self.script(),
 			'driver': self.driver(),
-			'default': self.vde
+			'default': self.default()
 
 		}
 
@@ -93,7 +97,7 @@ class output:
 			'name': self.name(),
 			'code': self.script(),
 			'driver': self.driver(),
-			'default': self.vde
+			'default': self.default()
 		}
 
 		with open('./outs/%s.json' % self.uid, 'w') as f: dump(v, f)

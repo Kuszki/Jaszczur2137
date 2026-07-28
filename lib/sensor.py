@@ -46,7 +46,7 @@ class sensor:
 		try: self.fmt = str(conf['format'])
 		except: self.fmt = "%0.1f %s"
 
-		self.avg = mavg(30)
+		self.avg = mavg(15)
 		self.sen = sen
 		self.uid = uid
 		self.var = var
@@ -59,17 +59,21 @@ class sensor:
 
 	def name(self): return self.nam
 
+	def format(self): return self.fmt
+
 	def unit(self): return self.uni
+
+	def id(self): return self.uid
 
 	def update(self): self.var[self.uid] = self.avg.update(self.sen.value())
 
 	def dump(self): return {
 
-			'uid': self.uid,
+			'uid': self.id(),
 			'name': self.name(),
 			'value': self.value(),
 			'unit': self.unit(),
-			'format': self.fmt,
+			'format': self.format(),
 			'text': str(self)
 
 		}

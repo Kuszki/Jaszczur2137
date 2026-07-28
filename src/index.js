@@ -126,7 +126,13 @@ function onSensors(data)
 
 	table.appendChild(tr);
 
-	const keys = Object.keys(data).sort();
+	const keys = Object.keys(data).sort(function(a, b)
+	{
+		if (data[a].name < data[b].name) return -1;
+		if (data[a].name > data[b].name) return 1;
+		return 0;
+	});
+
 	for (const k in keys)
 	{
 		const sensor = data[keys[k]];
@@ -162,7 +168,7 @@ function onOutputs(data)
 
 	table.appendChild(tr);
 
-	const keys = Object.keys(data).sort();
+	const keys = Object.keys(data);
 	for (const k in keys)
 	{
 		const output = data[keys[k]];

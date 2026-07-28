@@ -1,6 +1,6 @@
 # coding=UTF-8
 
-import time, ntptime, json, machine, os, gc, esp32, parser
+import time, ntptime, json, machine, os, gc, esp32
 
 class driver:
 

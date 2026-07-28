@@ -16,7 +16,8 @@ menu.help
 	right: 0px;
 	top: 0px;
 
-	width: max-content+25px;
+	min-width: 225px;
+	width: auto;
 	white-space: nowrap;
 }
 
@@ -24,6 +25,7 @@ menu.help > nav > *
 {
 	float: right;
 	text-align: right;
+	width: auto;
 }
 
 menu.help > nav > a

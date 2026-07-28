@@ -1,35 +1,51 @@
-from machine import ADC, SPI, Pin, Timer, freq
+from gc import collect, threshold
+from json import dumps, load
+from machine import Pin, freq
+from dht import DHT22
 
-from driver import driver; gc.collect()
-from server import server; gc.collect()
-from potent import potent; gc.collect()
-from json import dumps; gc.collect()
+from output import output
+from dthsens import dthsens
+from parser import genreport
+from driver import driver
+from server import server
 
-c = Pin(2, Pin.OUT, value = 1)
-p = Pin(23, Pin.OUT, value = 0)
+var = dict()
+sens = dict()
+outs = dict()
 
-d = driver(p); gc.collect()
-s = server(); gc.collect()
+with open("etc/outs.json", "r") as f:
+	for k, p in load(f).items():
+		outs[k] = output(k, Pin(p, Pin.OUT), var)
 
-s.defslite('temps.json', lambda v: dumps(d.get_temps()))
-s.defslite('system.json', lambda v: dumps(d.get_status()))
-s.defslite('prefs.json', lambda v: dumps(d.get_params()))
-s.defslite('scheds.json', lambda v: dumps(d.get_scheds()))
-s.defslite('tasks.json', lambda v: dumps(d.get_tasks()))
-s.defslite('history.json', lambda v: dumps(d.get_hist()))
-s.defslite('devinfo.json', lambda v: dumps(d.get_devinfo()))
-s.defslite('updates.json', lambda v: dumps(d.get_updates()))
-s.defslite('timing.json', lambda v: dumps(d.get_timing()))
-s.defslite('genid.var', lambda v: d.get_uids(v))
+dth_l = dthsens(DHT22(Pin(16)), 'tL', 'hL', var)
+dth_p = dthsens(DHT22(Pin(17)), 'tP', 'hP', var)
 
-s.defslite('config', lambda v: d.set_params(v))
-s.defslite('tempup', lambda v: d.set_temps(v))
-s.defslite('schedup', lambda v: d.set_scheds(v))
-s.defslite('taskup', lambda v: d.set_tasks(v))
+sens.update(dth_l.sensors())
+sens.update(dth_p.sensors())
 
-gc.threshold(25600)
+d = driver(outs, sens, var)
+s = server()
+
+s.defsite('outputs.json', lambda v: dumps(d.get_outputs()))
+s.defsite('sensors.json', lambda v: dumps(d.get_sensors()))
+s.defsite('units.json', lambda v: dumps(d.get_units()))
+s.defsite('prefs.json', lambda v: dumps(d.get_params()))
+s.defsite('tasks.json', lambda v: dumps(d.get_tasks()))
+s.defsite('history.json', lambda v: dumps(d.get_hist()))
+s.defsite('devinfo.json', lambda v: dumps(d.get_devinfo()))
+s.defsite('timing.json', lambda v: dumps(d.get_timing()))
+s.defsite('valid.json', lambda v: dumps(genreport(v, var)))
+s.defsite('genid.var', lambda v: d.get_uids(v))
+
+s.defsite('config', lambda v: d.set_params(v))
+s.defsite('taskup', lambda v: d.set_tasks(v))
+s.defsite('codeup', lambda v: d.set_scripts(v))
+s.defsite('power', lambda v: d.set_power(v))
+s.defsite('driver', lambda v: d.set_driver(v))
+
+threshold(25600)
 freq(240000000)
-gc.collect()
+collect()
 
 while True:
 

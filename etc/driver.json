@@ -1,1 +1,15 @@
-{"time": {"zone": 0, "loop": 30, "sync": 36000}, "plot": {"size": 480, "age": 432000}, "logs": {"size": 100, "age": 864000}}
+{
+	"time": {
+		"zone": 0,
+		"loop": 30,
+		"sync": 1800
+	},
+	"plot": {
+		"size": 120,
+		"age": 432000
+	},
+	"logs": {
+		"size": 75,
+		"age": 432000
+	}
+}

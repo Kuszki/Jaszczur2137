@@ -58,14 +58,14 @@ fi
 
 if [ $DO_FEECH == true ]
 then
-	wget -qO- "https://code.jquery.com/jquery-1.11.1.min.js"                           | gzip -9 > "arch/jquery.js.gz"
-	wget -qO- "https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"               | gzip -9 > "arch/moment.js.gz"
-	wget -qO- "https://cdn.jsdelivr.net/npm/moment@2.30.1/locale/pl.min.js"            | gzip -9 > "arch/moment.pl.js.gz"
-	wget -qO- "https://cdn.jsdelivr.net/npm/chart.js@2.9.4"                            | gzip -9 > "arch/chart.js.gz"
-	wget -qO- "https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"                            | gzip -9 > "arch/hammer.js.gz"
-	wget -qO- "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"                 | gzip -9 > "arch/chart.zoom.js.gz"
-	wget -qO- "https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.min.js"  | gzip -9 > "arch/codemirror.js.gz"
-	wget -qO- "https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.min.css" | gzip -9 > "arch/codemirror.css.gz"
+	wget -qO- "https://code.jquery.com/jquery-1.11.1.min.js"                           | gzip --best > "arch/jquery.js.gz"
+	wget -qO- "https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"               | gzip --best > "arch/moment.js.gz"
+	wget -qO- "https://cdn.jsdelivr.net/npm/moment@2.30.1/locale/pl.min.js"            | gzip --best > "arch/moment.pl.js.gz"
+	wget -qO- "https://cdn.jsdelivr.net/npm/chart.js@2.9.4"                            | gzip --best > "arch/chart.js.gz"
+	wget -qO- "https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"                            | gzip --best > "arch/hammer.js.gz"
+	wget -qO- "https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"                 | gzip --best > "arch/chart.zoom.js.gz"
+	wget -qO- "https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.min.js"  | gzip --best > "arch/codemirror.js.gz"
+	wget -qO- "https://cdn.jsdelivr.net/npm/codemirror@5.65.21/lib/codemirror.min.css" | gzip --best > "arch/codemirror.css.gz"
 fi
 
 if [ "$ROLE" == "server" ] || [ $DO_FEECH == true ]
@@ -97,10 +97,10 @@ fi
 
 if [ "$ROLE" == "server" ]
 then
-	mpfshell "$PORT" -s upload.mpf
+	mpfshell "$PORT" -s "upload.mpf"
 fi
 
-if [ $DO_BUILD == false ]
+if [ $DO_BUILD == true ] || [ "$ROLE" != "none" ]
 then
 	rm -f lib/*.mpy
 fi

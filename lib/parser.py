@@ -1,7 +1,6 @@
 # coding=UTF-8
 
 import math
-import traceback
 
 INV = 0; INS = 1; EXP = 2; UNV = 3; UNF = 4;
 ERF = 5; AGC = 6; OPE = 7; UEN = 8; ZDV = 9;

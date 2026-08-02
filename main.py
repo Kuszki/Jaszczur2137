@@ -1,8 +1,9 @@
 from gc import collect, threshold
 from json import dumps, load
-from machine import Pin, freq
+from machine import I2C, Pin, freq
 from dht import DHT22
 
+from display import display
 from output import output
 from dthsens import dthsens
 from parser import genreport
@@ -13,18 +14,22 @@ var = dict()
 sens = dict()
 outs = dict()
 
-with open("etc/outs.json", "r") as f:
+with open("/etc/outs.json", "r") as f:
 	for k, p in load(f).items():
 		outs[k] = output(k, Pin(p, Pin.OUT), var)
 
-dth_l = dthsens(DHT22(Pin(16)), 'tL', 'hL', var)
-dth_p = dthsens(DHT22(Pin(17)), 'tP', 'hP', var)
+dth_l = dthsens(DHT22(Pin(27)), 'tL', 'hL', var)
+dth_p = dthsens(DHT22(Pin(32)), 'tP', 'hP', var)
 
 sens.update(dth_l.sensors())
 sens.update(dth_p.sensors())
 
-d = driver(outs, sens, var)
+temp = lambda: (dth_l.temperature() + dth_p.temperature()) / 2
+rh = lambda: (dth_l.humidity() + dth_p.humidity()) / 2
+
 s = server()
+d = driver(outs, sens, var)
+i = display(I2C(0), Pin(33, Pin.IN, Pin.PULL_UP), temp, rh, d.get_tzone)
 
 s.defsite('outputs.json', lambda v: dumps(d.get_outputs()))
 s.defsite('sensors.json', lambda v: dumps(d.get_sensors()))
@@ -35,6 +40,7 @@ s.defsite('history.json', lambda v: dumps(d.get_hist()))
 s.defsite('devinfo.json', lambda v: dumps(d.get_devinfo()))
 s.defsite('timing.json', lambda v: dumps(d.get_timing()))
 s.defsite('valid.json', lambda v: dumps(genreport(v, var)))
+
 s.defsite('genid.var', lambda v: d.get_uids(v))
 
 s.defsite('config', lambda v: d.set_params(v))
@@ -49,5 +55,7 @@ collect()
 
 while True:
 
-	s.accept()
+	s.accept(75)
 	d.on_loop()
+	i.on_loop()
+

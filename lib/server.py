@@ -9,10 +9,10 @@ class server:
 
 	def __init__(self, port = 80):
 
-		try: self.users = json.load(open('./etc/users.json', 'r'))
+		try: self.users = json.load(open('/etc/users.json', 'r'))
 		except: self.users = dict()
 
-		try: self.etags = json.load(open('./etc/etags.json', 'r'))
+		try: self.etags = json.load(open('/etc/etags.json', 'r'))
 		except: self.etags = dict()
 
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -57,7 +57,7 @@ class server:
 
 		elif buff.startswith(b'POST /'):
 			site, par = self.post(buff, sock)
-			etag = time.time() # TODO ticks_ms
+			etag = time.ticks_ms()
 
 		else:
 			code = b'405 Method Not Allowed'
@@ -278,15 +278,15 @@ class server:
 
 	def site(self, path):
 
-		if path == 'favicon.ico': path = './obj/favicon.ico'
+		if path == 'favicon.ico': path = '/obj/favicon.ico'
 
-		elif path.endswith('.html'): path = './http/%s' % path
-		elif path.endswith('.json'): path = './etc/%s' % path
-		elif path.endswith('.css'): path = './css/%s' % path
-		elif path.endswith('.js'): path = './src/%s' % path
-		elif path.endswith('.gz'): path = './arch/%s' % path
+		elif path.endswith('.html'): path = '/http/%s' % path
+		elif path.endswith('.json'): path = '/etc/%s' % path
+		elif path.endswith('.css'): path = '/css/%s' % path
+		elif path.endswith('.js'): path = '/src/%s' % path
+		elif path.endswith('.gz'): path = '/arch/%s' % path
 
-		else: path = './var/%s' % path
+		else: path = '/var/%s' % path
 
 		try:
 
@@ -303,7 +303,7 @@ class server:
 
 		if path.endswith(".gz"): path = path[:-3]
 
-		if path.startswith('./var/'): mime = b'application/json'
+		if path.startswith('/var/'): mime = b'application/json'
 		elif path.endswith('.html'): mime = b'text/html'
 		elif path.endswith('.json'): mime = b'application/json'
 		elif path.endswith('.css'): mime = b'text/css'
@@ -317,11 +317,9 @@ class server:
 	def etag(self, path):
 
 		if path in self.etags: return self.etags[path]
-		else: return str(time.time()) # TODO ticks_ms
+		else: return str(time.ticks_ms())
 
 	def changed(self, path, etag):
-
-		return True # TODO
 
 		if etag == None: return True
 		elif path not in self.etags: return True

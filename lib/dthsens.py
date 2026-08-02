@@ -21,7 +21,7 @@ class dthsens:
 		self.hobj.update = self.update
 
 		self.tsens = sensor(tname, self.tobj, var)
-		self.hsens = sensor(hname, self.tobj, var)
+		self.hsens = sensor(hname, self.hobj, var)
 
 	def update(self):
 
@@ -38,3 +38,7 @@ class dthsens:
 			self.tsens.id(): self.tsens,
 			self.hsens.id(): self.hsens,
 		}
+
+	def temperature(self): return self.sens.temperature()
+
+	def humidity(self): return self.sens.humidity()

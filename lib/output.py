@@ -7,7 +7,7 @@ class output:
 
 	def __init__(self, uid, out, var):
 
-		try: conf = load(open('./outs/%s.json' % uid, 'r'))
+		try: conf = load(open('/outs/%s.json' % uid, 'r'))
 		except: conf = dict()
 
 		try: self.code = script(conf['code'], var, None, True)
@@ -100,4 +100,4 @@ class output:
 			'default': self.default()
 		}
 
-		with open('./outs/%s.json' % self.uid, 'w') as f: dump(v, f)
+		with open('/outs/%s.json' % self.uid, 'w') as f: dump(v, f)

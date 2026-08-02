@@ -65,6 +65,7 @@ put lib/output.mpy
 put lib/parser.mpy
 put lib/sensor.mpy
 put lib/dthsens.mpy
+put lib/display.mpy
 
 put http/index.html
 put http/scheds.html
@@ -79,7 +80,7 @@ put css/sets.css
 put css/jobs.css
 put css/logs.css
 put css/info.css
-put css/codes.css
+put css/code.css
 
 put src/index.js
 put src/scheds.js
@@ -92,7 +93,7 @@ put src/script.js
 
 put sens/hL.json
 put sens/tL.json
-put sens/hP.json
+put sens/tP.json
 put sens/hP.json
 
 put etc/network.json
@@ -101,7 +102,6 @@ put etc/driver.json
 put etc/etags.json
 put etc/users.json
 put etc/plot.json
-put etc/plan.json
 put etc/jobs.json
 put etc/outs.json
 

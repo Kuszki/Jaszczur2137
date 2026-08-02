@@ -12,7 +12,7 @@ Projekt znajduje się we wczesnej fazie rozwoju.
 
 # Zależności
 
-- [K-ESP-CTRL]https://github.com/Kuszki/K-ESP-CTRL - zapożyczono serwer HTTP (GPL3)
+- [K-ESP-CTRL](https://github.com/Kuszki/K-ESP-CTRL) - zapożyczono serwer HTTP (GPL3)
 - [Chart.js](https://github.com/chartjs/Chart.js) - biblioteka do tworzenia wykresów w JavaScript (MIT)
 - [chartjs-plugin-zoom](https://github.com/chartjs/chartjs-plugin-zoom) - plugin do obsługi powiększania i przesuwania wykresów Chart.js (MIT)
 - [CodeMirror](https://github.com/codemirror/dev) - edytor kodu w przeglądarce z obsługą składni i rozszerzeń (MIT)

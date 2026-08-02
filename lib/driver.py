@@ -396,7 +396,7 @@ class driver:
 		return \
 		{
 			'Godzina': '%d:%02d:%02d' % (t[3], t[4], t[5]),
-			'Data': '%02d.%02d.%d' % (t[2], t[1], t[0]),
+			'Data': '%02d.%02d.%04d' % (t[2], t[1], t[0]),
 			'Czas pracy': '%dd %dh %dm' % (udays, uhours, umins),
 
 			'Dostępna pamięć RAM': mem,
@@ -462,6 +462,10 @@ class driver:
 	def get_tasks(self):
 
 		return self.tasks
+
+	def get_tzone(self):
+
+		return self.tzone
 
 	def get_uids(self, v):
 
@@ -594,6 +598,8 @@ class driver:
 
 			self.var['wday'] = t[6] + 1
 
+			self.last_loop = now
+
 			if len(self.tasks) > 0: self.on_task(now)
 
 			for o in self.outs.values():
@@ -604,13 +610,11 @@ class driver:
 					new = o.compute()
 				except Exception as e:
 					self.save_logs('err', o.name(), str(e))
-					o.update(driver = False)
+					o.update(driver = False, state = o.default())
 					old = new = None
 
 				if old != new:
 					self.save_logs('pwr', o.name(), int(new))
-
-			self.last_loop = now
 
 		if now - self.tp_save >= self.ptime:
 			self.on_hist(now)

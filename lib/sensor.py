@@ -34,7 +34,7 @@ class sensor:
 
 	def __init__(self, uid, sen, var):
 
-		try: conf = load(open('./sens/%s.json' % uid, 'r'))
+		try: conf = load(open('/sens/%s.json' % uid, 'r'))
 		except: conf = dict()
 
 		try: self.nam = str(conf['name'])
@@ -65,7 +65,14 @@ class sensor:
 
 	def id(self): return self.uid
 
-	def update(self): self.var[self.uid] = self.avg.update(self.sen.value())
+	def update(self):
+
+		self.sen.update()
+
+		val = self.sen.value()
+		val = self.avg.update(val)
+
+		self.var[self.uid] = val
 
 	def dump(self): return {
 

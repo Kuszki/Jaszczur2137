@@ -10,6 +10,7 @@ from parser import genreport
 from driver import driver
 from server import server
 
+s = server()
 var = dict()
 sens = dict()
 outs = dict()
@@ -18,16 +19,27 @@ with open("/etc/outs.json", "r") as f:
 	for k, p in load(f).items():
 		outs[k] = output(k, Pin(p, Pin.OUT), var)
 
-dth_l = dthsens(DHT22(Pin(27)), 'tL', 'hL', var)
-dth_p = dthsens(DHT22(Pin(32)), 'tP', 'hP', var)
+try: dth_l = dthsens(DHT22(Pin(27)), 'tL', 'hL', var)
+except: dth_l = None
+else: sens.update(dth_l.sensors())
 
-sens.update(dth_l.sensors())
-sens.update(dth_p.sensors())
+try: dth_p = dthsens(DHT22(Pin(32)), 'tP', 'hP', var)
+except: dth_p = None
+else: sens.update(dth_p.sensors())
 
-temp = lambda: (dth_l.temperature() + dth_p.temperature()) / 2
-rh = lambda: (dth_l.humidity() + dth_p.humidity()) / 2
+if dth_l is not None and dth_p is not None:
+	temp = lambda: (dth_l.temperature() + dth_p.temperature()) / 2
+	rh = lambda: (dth_l.humidity() + dth_p.humidity()) / 2
+elif dth_l is not None:
+	temp = dth_l.temperature
+	rh = dth_l.humidity
+elif dth_p is not None:
+	temp = dth_p.temperature
+	rh = dth_p.humidity
+else:
+	temp = lambda: 0.0
+	rh = lambda: 0.0
 
-s = server()
 d = driver(outs, sens, var)
 i = display(I2C(0), Pin(33, Pin.IN, Pin.PULL_UP), temp, rh, d.get_tzone)
 

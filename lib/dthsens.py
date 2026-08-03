@@ -39,6 +39,6 @@ class dthsens:
 			self.hsens.id(): self.hsens,
 		}
 
-	def temperature(self): return self.sens.temperature()
+	def temperature(self): return self.tsens.value()
 
-	def humidity(self): return self.sens.humidity()
+	def humidity(self): return self.hsens.value()

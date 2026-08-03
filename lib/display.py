@@ -115,21 +115,24 @@ class HD44780_via_PCF8574:
 
 class display:
 
-	INFO = '> %4.1f ' + chr(176) +'C   %2.0f' + chr(37) + ' <' # chr(223)
+	INFO = ' %4.1f' + chr(223) + 'C   %4.1f%% '
 	DATE = '%02d.%02d.%04d %02d:%02d'
 
 	def __init__(self, i2c, pin, temp, rh, tz):
 
-		self.disp = HD44780_via_PCF8574(i2c, en = False)
-		self.pin = pin
+		try: self.disp = HD44780_via_PCF8574(i2c, en = False)
+		except: self.disp = None
+		else:
 
-		self.temp = temp
-		self.rh = rh
-		self.tz = tz
+			self.pin = pin
 
-		self.on = False
-		self.last = 0
-		self.down = 0
+			self.temp = temp
+			self.rh = rh
+			self.tz = tz
+
+			self.on = False
+			self.last = 0
+			self.down = 0
 
 	def on_refresh(self, now):
 
@@ -142,6 +145,8 @@ class display:
 		self.disp.print(self.INFO % (self.temp(), self.rh()))
 
 	def on_loop(self):
+
+		if self.disp is None: return
 
 		btn = self.pin.value()
 		now = time()

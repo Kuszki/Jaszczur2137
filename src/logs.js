@@ -52,9 +52,7 @@ function onLogs(data)
 {
 	const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
-	const diff = Date.UTC(2000, 0, 1) - new Date(2000, 0, 1);
 	const off = Date.UTC(2000, 0, 1);
-	const now = (new Date() - off) / 1000;
 
 	const container = document.getElementById("log");
 	const table = document.createElement("table");
@@ -68,28 +66,9 @@ function onLogs(data)
 		return 0;
 	});
 
-	for (let i = 0; i < data.length; ++i)
-	{
-		if (data[i].k != 'pwr') continue;
-
-		if (!found) data[i].d = now - data[i].t;
-		else for (let j = i-1; j >= 0 && data[i].d == null; --j)
-		{
-			if (data[j].k != 'pwr') continue;
-			else data[i].d = data[j].t - data[i].t;
-		}
-
-		data[i].d = Math.floor(data[i].d / 60);
-		found = true;
-	}
-
 	for (const k in data)
 	{
-		const secs = data[k].t + (diff / 1000);
-		const day = secs - (secs % 86400);
-		const next = day + 86400;
-
-		const date = new Date(day * 1000 + off);
+		const date = new Date(data[k].t * 1000 + off);
 		const sdate = date.toLocaleDateString('pl', options);
 
 		if (days.hasOwnProperty(sdate))

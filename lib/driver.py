@@ -395,7 +395,7 @@ class driver:
 
 		return \
 		{
-			'Godzina': '%d:%02d:%02d' % (t[3], t[4], t[5]),
+			'Godzina': '%02d:%02d:%02d' % (t[3], t[4], t[5]),
 			'Data': '%02d.%02d.%04d' % (t[2], t[1], t[0]),
 			'Czas pracy': '%dd %dh %dm' % (udays, uhours, umins),
 

@@ -1,6 +1,6 @@
+from machine import I2C, Pin, Encoder, freq
 from gc import collect, threshold
 from json import dumps, load
-from machine import I2C, Pin, freq
 from dht import DHT22
 
 from display import display
@@ -11,6 +11,7 @@ from driver import driver
 from server import server
 
 s = server()
+
 var = dict()
 sens = dict()
 outs = dict()
@@ -19,29 +20,24 @@ with open("/etc/outs.json", "r") as f:
 	for k, p in load(f).items():
 		outs[k] = output(k, Pin(p, Pin.OUT), var)
 
-try: dth_l = dthsens(DHT22(Pin(27)), 'tL', 'hL', var)
+try: dth_l = dthsens(DHT22(Pin(25)), 'tL', 'hL', var)
 except: dth_l = None
 else: sens.update(dth_l.sensors())
 
-try: dth_p = dthsens(DHT22(Pin(32)), 'tP', 'hP', var)
+try: dth_p = dthsens(DHT22(Pin(26)), 'tP', 'hP', var)
 except: dth_p = None
 else: sens.update(dth_p.sensors())
 
-if dth_l is not None and dth_p is not None:
-	temp = lambda: (dth_l.temperature() + dth_p.temperature()) / 2
-	rh = lambda: (dth_l.humidity() + dth_p.humidity()) / 2
-elif dth_l is not None:
-	temp = dth_l.temperature
-	rh = dth_l.humidity
-elif dth_p is not None:
-	temp = dth_p.temperature
-	rh = dth_p.humidity
-else:
-	temp = lambda: 0.0
-	rh = lambda: 0.0
+enc = Encoder(0, \
+	Pin(32, Pin.IN, Pin.PULL_UP), \
+	Pin(33, Pin.IN, Pin.PULL_UP), \
+	phases = 4, filter_ns = 150)
+
+i2c = I2C(0, scl = Pin(18), sda = Pin(19))
+btn = Pin(27, Pin.IN, Pin.PULL_UP)
 
 d = driver(outs, sens, var)
-i = display(I2C(0), Pin(33, Pin.IN, Pin.PULL_UP), temp, rh, d.get_tzone)
+i = display(i2c, btn, enc, dth_l, dth_p, d.get_tzone)
 
 s.defsite('outputs.json', lambda v: dumps(d.get_outputs()))
 s.defsite('sensors.json', lambda v: dumps(d.get_sensors()))
@@ -67,7 +63,6 @@ collect()
 
 while True:
 
-	s.accept(75)
 	d.on_loop()
+	s.accept(75)
 	i.on_loop()
-

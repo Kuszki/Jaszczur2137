@@ -58,14 +58,14 @@ put arch/jquery.js.gz
 put arch/moment.js.gz
 put arch/moment.pl.js.gz
 
-put lib/server.mpy
-put lib/driver.mpy
-put lib/netconf.mpy
-put lib/output.mpy
-put lib/parser.mpy
-put lib/sensor.mpy
-put lib/dthsens.mpy
-put lib/display.mpy
+putc lib/server.py
+putc lib/driver.py
+putc lib/netconf.py
+putc lib/output.py
+putc lib/parser.py
+putc lib/sensor.py
+putc lib/dthsens.py
+putc lib/display.py
 
 put http/index.html
 put http/scheds.html

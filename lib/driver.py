@@ -6,7 +6,7 @@ class driver:
 
 	def __init__(self, outs, sens, var):
 
-		try: self.tasks = json.load(open('./etc/jobs.json', 'r'))
+		try: self.tasks = json.load(open('/etc/jobs.json', 'r'))
 		except: self.tasks = dict()
 		else: gc.collect()
 		finally: self.lastt = 0
@@ -15,7 +15,7 @@ class driver:
 			if int(k) >= self.lastt:
 				self.lastt = int(k) + 1
 
-		try: settings = json.load(open('./etc/driver.json', 'r'))
+		try: settings = json.load(open('/etc/driver.json', 'r'))
 		except: settings = dict()
 		else: gc.collect()
 
@@ -76,12 +76,12 @@ class driver:
 
 	def save_settings(self):
 
-		with open('./etc/driver.json', 'w') as f:
+		with open('/etc/driver.json', 'w') as f:
 			json.dump(self.get_conf(), f)
 
 	def save_tasks(self):
 
-		with open('./etc/jobs.json', 'w') as f:
+		with open('/etc/jobs.json', 'w') as f:
 			json.dump(self.get_tasks(), f)
 
 	def save_outs(self):
@@ -96,7 +96,7 @@ class driver:
 
 			val = round(y.value(), 2)
 			data = { 't': now, 'y': val }
-			path = './var/%s' % k
+			path = '/var/%s' % k
 			v = dict()
 			save = True
 
@@ -129,14 +129,14 @@ class driver:
 
 		if now == None: now = time.time()
 
-		try: logs = json.load(open('./etc/log.json', 'r'))
+		try: logs = json.load(open('/etc/logs.json', 'r'))
 		except: logs = list()
 
 		while len(logs) >= self.lsize: logs.pop(-1)
 
 		logs.insert(0, { 't': now, 'k': k, 'u': u, 's': s })
 
-		with open('./etc/log.json', 'w') as f: json.dump(logs, f)
+		with open('/etc/logs.json', 'w') as f: json.dump(logs, f)
 
 	def set_power(self, v):
 
@@ -337,7 +337,7 @@ class driver:
 
 			if 'rmlogs' in v:
 
-				try: os.remove('./etc/log.json')
+				try: os.remove('/etc/logs.json')
 				except: ok = False
 				else: num = num + 1
 
@@ -453,7 +453,7 @@ class driver:
 
 	def get_hist(self):
 
-		return os.listdir('./var')
+		return os.listdir('/var')
 
 	def get_scheds(self):
 
@@ -490,11 +490,11 @@ class driver:
 	def on_startup(self, now):
 
 		null = { 't': now, 'y': None }
-		hist = os.listdir('./var')
+		hist = os.listdir('/var')
 
 		for l in hist:
 
-			path = './var/%s' % l
+			path = '/var/%s' % l
 			save = False
 
 			try:
@@ -548,7 +548,7 @@ class driver:
 
 	def on_logs(self, now):
 
-		try: logs = json.load(open('./etc/log.json', 'r'))
+		try: logs = json.load(open('/etc/logs.json', 'r'))
 		except: return None
 		else: save = False
 		finally:
@@ -566,9 +566,9 @@ class driver:
 				logs.pop(-1)
 				save = True
 
-		if not len(logs): os.remove('./etc/log.json')
+		if not len(logs): os.remove('/etc/logs.json')
 		elif save:
-			with open('./etc/log.json', 'w') as f:
+			with open('/etc/logs.json', 'w') as f:
 				json.dump(logs, f)
 
 	def on_loop(self):

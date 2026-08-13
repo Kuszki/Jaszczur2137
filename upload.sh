@@ -8,7 +8,6 @@ PORT="ttyUSB0"
 DO_FEECH=false
 DO_FLASH=false
 DO_REPL=false
-DO_BUILD=false
 
 IS_FIRST=true
 
@@ -35,10 +34,6 @@ while [ "$1" != "" ]; do
 			DO_REPL=true
 			;;
 			
-		-b | --build)
-			DO_BUILD=true
-			;;
-			
 		-s | --skip)
 			ROLE="none"
 			;;
@@ -47,14 +42,6 @@ while [ "$1" != "" ]; do
 	shift
 
 done
-
-if [ $DO_BUILD == true ] || [ "$ROLE" != "none" ]
-then
-	for f in lib/*.py
-	do
-		mpy-cross -O3 -march=xtensa $f
-	done
-fi
 
 if [ $DO_FEECH == true ]
 then
@@ -98,11 +85,6 @@ fi
 if [ "$ROLE" == "server" ]
 then
 	mpfshell "$PORT" -s "upload.mpf"
-fi
-
-if [ $DO_BUILD == true ] || [ "$ROLE" != "none" ]
-then
-	rm -f lib/*.mpy
 fi
 
 if [ $DO_REPL == true ]

@@ -1,6 +1,6 @@
 {
 	"name": "Jasne",
 	"code": "7:30 <= t <= 21:37",
-	"driver": 1,
+	"driver": 0,
 	"default": 0
 }

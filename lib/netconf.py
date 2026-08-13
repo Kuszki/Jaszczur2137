@@ -24,6 +24,8 @@ def configure():
 			try: net.connect(con['ssid'], con['pass'])
 			except: pass
 
+			while not net.isconnected(): sleep(1)
+
 	if 'access' in conf:
 
 		net = network.WLAN(network.AP_IF)

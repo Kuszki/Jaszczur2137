@@ -116,11 +116,13 @@ class HD44780_via_PCF8574:
 
 class display:
 
-	INFO = ' %4.1f' + chr(223) + 'C   %4.1f%% '
+	INFO = ' %04.1f' + chr(223) + 'C   %04.1f%% '
 	DATE = '%02d.%02d.%04d %02d:%02d'
 
-	TMP = '%4.1f' + chr(223) + 'C    %4.1f' + chr(223) + 'C'
-	HUM = '%4.1f%%      %4.1f%%'
+	TMP = '%04.1f' + chr(223) + 'C    %04.1f' + chr(223) + 'C'
+	HUM = '%04.1f%%      %04.1f%%'
+
+	FMT = '%-16s'
 
 	def __init__(self, i2c, pin, enc, dth_l, dth_p, tz):
 
@@ -167,7 +169,6 @@ class display:
 			t = now + self.tz() * 3600
 			t = localtime(t)[0:6]
 
-			self.disp.clear()
 			self.disp.moveto(0, 0)
 			self.disp.print(self.DATE % (t[2], t[1], t[0], t[3], t[4]))
 			self.disp.moveto(1, 0)
@@ -181,13 +182,12 @@ class display:
 			else:
 				t_l = h_l = 0.0
 
-			if self.dth_l is not None:
-				t_r = self.dth_r.temperature()
-				h_r = self.dth_r.humidity()
+			if self.dth_p is not None:
+				t_r = self.dth_p.temperature()
+				h_r = self.dth_p.humidity()
 			else:
 				t_r = h_r = 0.0
 
-			self.disp.clear()
 			self.disp.moveto(0, 0)
 			self.disp.print(self.TMP % (t_l, t_r))
 			self.disp.moveto(1, 0)
@@ -197,48 +197,48 @@ class display:
 
 			net = WLAN(STA_IF)
 
-			self.disp.clear()
 			self.disp.moveto(0, 0)
-			self.disp.print(net.config('hostname'))
+			self.disp.print(self.FMT % net.config('hostname'))
 			self.disp.moveto(1, 0)
-			self.disp.print(net.ifconfig()[0])
+			self.disp.print(self.FMT % net.ifconfig()[0])
 
 	def on_loop(self):
 
 		if self.disp is None: return
 		else:
 
+			btn = not self.pin.value()
 			pos = self.enc.value()
-			btn = self.pin.value()
 
 			now = time()
-			pch = False
+			inc = 0
 
 		if pos != self.lenc:
 
-			if pos > self.lenc: inc = 1
-			else: inc = -1
+			if pos < self.lenc: inc = -1
+			elif pos > self.lenc: inc = 1
 
-			self.page = (self.page + inc) % 3
 			self.lenc = pos
+			self.page = (self.page + inc) % 3
+			self.last = 0
 
-			btn = False
-			pch = True
+			btn = True
 
-		if not btn: self.down = now + 15
-
-		if not btn and not self.on:
+		if not self.on and btn:
 
 			self.disp.backlight(True)
 			self.on = True
+
+		if btn: self.down = now + 15
 
 		if self.on and now >= self.down:
 
 			self.disp.backlight(False)
 			self.on = False
 			self.page = 0
+			self.last = 0
 
-		if pch or now - self.last >= 5:
+		if now - self.last >= 5:
 
 			self.on_refresh(now)
 			self.last = now

@@ -102,7 +102,6 @@ put etc/driver.json
 put etc/etags.json
 put etc/users.json
 put etc/plot.json
-put etc/jobs.json
 put etc/outs.json
 
 put outs/lewe.json

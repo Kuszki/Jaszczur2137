@@ -31,7 +31,7 @@ else: sens.update(dth_p.sensors())
 enc = Encoder(0, \
 	Pin(32, Pin.IN, Pin.PULL_UP), \
 	Pin(33, Pin.IN, Pin.PULL_UP), \
-	phases = 4, filter_ns = 150)
+	phases = 4, filter_ns = 750)
 
 i2c = I2C(0, scl = Pin(18), sda = Pin(19))
 btn = Pin(27, Pin.IN, Pin.PULL_UP)
@@ -64,5 +64,5 @@ collect()
 while True:
 
 	d.on_loop()
-	s.accept(75)
+	s.accept(333)
 	i.on_loop()

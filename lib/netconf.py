@@ -15,6 +15,7 @@ def configure():
 		con = conf['client']
 
 		net.active(bool(int(con['on'])))
+		net.config(pm = net.PM_POWERSAVE)
 
 		if 'name' in con:
 			try: net.config(dhcp_hostname = con['name'])

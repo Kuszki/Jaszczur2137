@@ -577,7 +577,9 @@ class driver:
 		else: now = time.time()
 
 		if now - self.last_loop >= 1:
-			for s in self.sens.values(): s.update()
+			for s in self.sens.values():
+				try: s.update()
+				except: pass
 
 		if now - self.last_sync >= self.sync:
 			now = self.on_time(now)

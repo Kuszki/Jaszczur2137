@@ -37,7 +37,7 @@ function onLoad()
 {
 	$.ajaxSetup({ 'timeout': 5000 });
 
-	$.getJSON('log.json', onLogs)
+	$.getJSON('logs.json', onLogs)
 	.done(function()
 	{
 		setInterval($.getJSON, 60000, 'log.json', onLogs);
@@ -110,7 +110,7 @@ function onLogs(data)
 			const time = new Date(item.t * 1000 + off);
 			const sdate = time.toLocaleTimeString('pl');
 
-			if (item.k == 'err') msg = messages['err'] + item.u + '<i>' + item.s + '</i>';
+			if (item.k == 'err') msg = messages['err'] + item.u + '"' + item.s + '"';
 			else if (item.u == null) msg = messages[item.k][item.s];
 			else if (item.u == 'all') msg = messages[item.k][item.s] + messages[item.k]['all'];
 			else msg = messages[item.k][item.s] + messages[item.k]['one'] + item.u;

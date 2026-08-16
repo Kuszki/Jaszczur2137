@@ -10,6 +10,8 @@ const dones =
 	'pwr': 'Sterowanie zostało zaktualizowane'
 };
 
+let unit_list = [];
+
 function onLoad()
 {
 	$.ajaxSetup({ 'timeout': 5000 });
@@ -17,35 +19,42 @@ function onLoad()
 	$.when
 	(
 		$.getJSON('plot.json'),
-		$.getJSON('units.json'),
 		$.getJSON('history.json')
 	)
-	.done(function(config, units, hist)
+	.done(function(config, hist)
 	{
 		let off = Date.UTC(2000, 0, 1);
 		let data = new Array();
+		let conf = config[0];
 
-		config[0].options.tooltips.callbacks.label = function(tooltipItem, data) {
+		conf.options.tooltips.callbacks.label = function(tooltipItem, data) {
 			return Number(tooltipItem.yLabel).toFixed(1);
 		};
 
-		for (k in units[0]) config[0].options.scales.yAxes.push({
-			id: genHash(units[0][k]),
-			position: k % 2 ? 'right' : 'left'
-		});
-
-		ctx = $('#plot')[0].getContext('2d');
-		plot = new Chart(ctx, config[0]);
 		moment.locale('pl');
+
+		let ctx = $('#plot')[0].getContext('2d');
+		let plot = new Chart(ctx, conf);
 
 		for (k in hist[0]) $.getJSON(hist[0][k], function(x)
 		{
-			cn = plot.data.datasets.length;
+			let cn = plot.data.datasets.length;
+			let hash = genHash(x.unit);
+
+			if (!unit_list.includes(hash))
+			{
+				unit_list.push(hash);
+
+				plot.options.scales.yAxes.push({
+					id: hash,
+					position: unit_list.length % 2 ? 'right' : 'left'
+				});
+			}
 
 			x.fill = false;
 			x.borderColor = pl_colors[cn];
 			x.cubicInterpolationMode = 'monotone';
-			x.yAxisID = genHash(x.unit);
+			x.yAxisID = hash;
 
 			for (j = 0; j < x.data.length; ++j)
 			{

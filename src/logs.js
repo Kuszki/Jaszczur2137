@@ -18,7 +18,7 @@ const messages =
 	{
 		1: 'Włączono sterownik',
 		2: 'Zrestartowano sterownik',
-		3: 'Zrestartowano sterownik',
+		3: 'Awaria sterownika',
 		4: 'Obudzono sterownik',
 		5: 'Zrestartowano sterownik'
 	},

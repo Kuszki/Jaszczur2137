@@ -66,6 +66,7 @@ putc lib/parser.py
 putc lib/sensor.py
 putc lib/dthsens.py
 putc lib/display.py
+putc lib/encoder.py
 
 put http/index.html
 put http/scheds.html

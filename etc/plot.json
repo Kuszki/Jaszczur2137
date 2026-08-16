@@ -9,6 +9,11 @@
 		"responsive": true,
 		"scales":
 		{
+			"yAxes":
+			[{
+				"id": "default",
+				"display": false
+			}],
 			"xAxes":
 			[{
 				"type": "time",
@@ -32,8 +37,7 @@
 						"day": "D MMMM"
 					}
 				}
-			}],
-			"yAxes": []
+			}]
 		},
 		"pan":
 		{

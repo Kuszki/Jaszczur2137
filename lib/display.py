@@ -1,5 +1,8 @@
+# coding=UTF-8
+
 from time import time, localtime, sleep_us
 from network import WLAN, STA_IF
+from machine import Pin
 
 class HD44780_via_PCF8574:
 
@@ -138,11 +141,15 @@ class display:
 
 			self.tz = tz
 
+			self.irq = False
 			self.on = False
+
 			self.last = 0
 			self.down = 0
 			self.lenc = 0
 			self.page = 0
+
+			pin.irq(self.on_interrupt, Pin.IRQ_FALLING)
 
 	def get_avg(self):
 
@@ -160,6 +167,10 @@ class display:
 			rh = 0.0
 
 		return temp, rh
+
+	def on_interrupt(self, pin):
+
+		if pin is self.pin: self.irq = True
 
 	def on_refresh(self, now):
 
@@ -213,6 +224,10 @@ class display:
 			now = time()
 			inc = 0
 
+		if self.irq:
+			self.irq = False
+			btn = True
+
 		if pos != self.lenc:
 
 			if pos < self.lenc: inc = -1
@@ -221,7 +236,6 @@ class display:
 			self.lenc = pos
 			self.page = (self.page + inc) % 3
 			self.last = 0
-
 			btn = True
 
 		if not self.on and btn:

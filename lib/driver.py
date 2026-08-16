@@ -363,16 +363,6 @@ class driver:
 
 		return out
 
-	def get_units(self):
-
-		out = list()
-
-		for s in self.sens.values():
-			if s.unit() not in out:
-				out.append(s.unit())
-
-		return out
-
 	def get_devinfo(self):
 
 		try: tmp = esp32.raw_temperature()

@@ -1,6 +1,9 @@
+from gc import collect, threshold
 from netconf import configure
-from gc import collect
+from machine import freq
 
-collect()
+freq(160000000)
+threshold(25600)
+
 configure()
 collect()

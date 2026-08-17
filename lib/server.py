@@ -45,7 +45,7 @@ class server:
 		except: return None
 
 		while buff.find(b'\r\n\r\n') == -1:
-			if not buff: raise BufferError
+			if not buff: raise MemoryError
 			else: buff += sock.recv(1460)
 
 		if not self.auth(buff):
@@ -196,7 +196,7 @@ class server:
 		while len(req) != leng:
 			try: req += sock.recv(leng - len(req))
 			except: return site, dict()
-			if not req: raise BufferError
+			if not req: raise MemoryError
 
 		if j != -1: vlist = json.loads(req)
 		elif p != -1: vlist = req.decode()

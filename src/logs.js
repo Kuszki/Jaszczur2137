@@ -40,7 +40,7 @@ function onLoad()
 	$.getJSON('logs.json', onLogs)
 	.done(function()
 	{
-		setInterval($.getJSON, 60000, 'log.json', onLogs);
+		setInterval($.getJSON, 60000, 'logs.json', onLogs);
 	})
 	.fail(function()
 	{

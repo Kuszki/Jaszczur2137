@@ -1,20 +1,15 @@
 # coding=UTF-8
 
 from time import time, localtime, sleep_us
-from network import WLAN, STA_IF
 from micropython import const
-from machine import Pin
-
-_PCF_RS = const(0x01)
-_PCF_RW = const(0x02)
-_PCF_EN = const(0x04)
-_PCF_BL = const(0x08)
 
 _INFO = const(' %04.1f\xDFC   %04.1f%% ')
 _DATE = const('%02d.%02d.%04d %02d:%02d')
+
 _TMP = const('%04.1f\xDFC    %04.1f\xDFC')
 _HUM = const('%04.1f%%      %04.1f%%')
-_FMT = const('%-16s')
+
+_PAGES = const(2)
 
 class HD44780_via_PCF8574:
 
@@ -118,9 +113,9 @@ class HD44780_via_PCF8574:
 
 		i2cData = halfByte << 4
 
-		if isData: i2cData |= _PCF_RS
-		if enable: i2cData |= _PCF_EN
-		if self._backlight: i2cData |= _PCF_BL
+		if isData: i2cData |= 0x01
+		if enable: i2cData |= 0x04
+		if self._backlight: i2cData |= 0x08
 
 		self.i2c.writeto(self._i2cAddr, i2cData.to_bytes(1, 'big'))
 
@@ -148,8 +143,6 @@ class display:
 			self.lenc = 0
 			self.page = 0
 
-			pin.irq(self.on_interrupt, Pin.IRQ_FALLING)
-
 	def get_avg(self):
 
 		if self.dth_l is not None and self.dth_p is not None:
@@ -167,17 +160,25 @@ class display:
 
 		return temp, rh
 
+	def get_time(self, now = None):
+
+		if now is None: now = time() + self.tz() * 3600
+		else: now = now + self.tz() * 3600
+
+		return localtime(now)[0:6]
+
 	def on_interrupt(self, pin):
 
 		if pin is self.pin: self.irq = True
 
-	def on_refresh(self, now):
+	def on_refresh(self, now = None):
+
+		if now is None: now = time()
 
 		if self.page == 0:
 
 			temp, rh = self.get_avg()
-			t = now + self.tz() * 3600
-			t = localtime(t)[0:6]
+			t = self.get_time(now)
 
 			self.disp.moveto(0, 0)
 			self.disp.print(_DATE % (t[2], t[1], t[0], t[3], t[4]))
@@ -203,15 +204,6 @@ class display:
 			self.disp.moveto(1, 0)
 			self.disp.print(_HUM % (h_l, h_r))
 
-		elif self.page == 2:
-
-			net = WLAN(STA_IF)
-
-			self.disp.moveto(0, 0)
-			self.disp.print(_FMT % net.config('hostname'))
-			self.disp.moveto(1, 0)
-			self.disp.print(_FMT % net.ifconfig()[0])
-
 	def on_loop(self):
 
 		if self.disp is None: return
@@ -232,8 +224,8 @@ class display:
 			if pos < self.lenc: inc = -1
 			elif pos > self.lenc: inc = 1
 
+			self.page = (self.page + inc) % _PAGES
 			self.lenc = pos
-			self.page = (self.page + inc) % 3
 			self.last = 0
 			btn = True
 
@@ -247,6 +239,7 @@ class display:
 		if self.on and now >= self.down:
 
 			self.disp.backlight(False)
+
 			self.on = False
 			self.page = 0
 			self.last = 0

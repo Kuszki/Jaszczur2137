@@ -5,6 +5,5 @@ from machine import freq
 freq(240000000)
 threshold(32768)
 
-try: configure()
-except: pass
-finally: collect()
+configure()
+collect()

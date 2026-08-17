@@ -5,7 +5,7 @@ from machine import Pin
 
 class encoder:
 
-	def __init__(self, a, b, time = 1000):
+	def __init__(self, a, b, time = 750):
 
 		self.pin_a = a
 		self.pin_b = b

@@ -31,7 +31,7 @@ class output:
 		out.value(self.val)
 		var[uid] = self.val
 
-	def __str__(self): return "ON" if self.value else "OFF"
+	def __str__(self): return "ON" if self.status() else "OFF"
 
 	def __bool__(self): return self.status()
 

@@ -2,6 +2,7 @@
 
 from time import time, localtime, sleep_us
 from micropython import const
+from machine import Pin
 
 _INFO = const(' %04.1f\xDFC   %04.1f%% ')
 _DATE = const('%02d.%02d.%04d %02d:%02d')
@@ -13,46 +14,30 @@ _PAGES = const(2)
 
 class HD44780_via_PCF8574:
 
-	_row_offsets = [None] * 4
+	_row_offsets = [ 0x00, 0x40 ]
 
-	def __init__(self, i2c, i2cAddr = 0x27, rows = 2, cols = 16, en = True):
+	def __init__(self, i2c, addr = 0x27, en = True):
 
-		self._i2cAddr = i2cAddr
-		self._backlight = 0
-
-		self._entrymode = 0x02
-		self._displaycontrol = 0x04
+		self._i2cAddr = addr
+		self._backlight = en
+		self._displaycontrol = 0
 
 		self.i2c = i2c
 
-		self._cols = min(cols, 80)
-		self._lines = min(rows, 4)
-
-		functionFlags = 0
-
-		self._row_offsets[0] = 0x00
-		self._row_offsets[1] = 0x40
-		self._row_offsets[2] = 0x00 + cols
-		self._row_offsets[3] = 0x40 + cols
-
-		if rows > 1: functionFlags |= 0x08
-
 		self._write2Wire(0x00, False, False)
-		sleep_us(50000)
-
-		self._displaycontrol = 0x04
-		self._entrymode = 0x02
-		self._backlight = en
+		sleep_us(15000)
 
 		self._sendNibble(0x03)
-		sleep_us(4500)
+		sleep_us(4200)
 		self._sendNibble(0x03)
-		sleep_us(200)
+		sleep_us(110)
 		self._sendNibble(0x03)
-		sleep_us(200)
+		sleep_us(110)
 		self._sendNibble(0x02)
+		sleep_us(40)
 
-		self._send(0x20 | functionFlags)
+		self._send(0x28)
+		sleep_us(40)
 
 		self.display()
 		self.clear()
@@ -121,7 +106,7 @@ class HD44780_via_PCF8574:
 
 class display:
 
-	def __init__(self, i2c, pin, enc, dth_l, dth_p, tz):
+	def __init__(self, i2c, pin, enc, dth_l, dth_p, time):
 
 		try: self.disp = HD44780_via_PCF8574(i2c, en = False)
 		except: self.disp = None
@@ -133,7 +118,7 @@ class display:
 			self.dth_l = dth_l
 			self.dth_p = dth_p
 
-			self.tz = tz
+			self.time = time
 
 			self.irq = False
 			self.on = False
@@ -142,6 +127,12 @@ class display:
 			self.down = 0
 			self.lenc = 0
 			self.page = 0
+
+			pin.irq(self._irq, Pin.IRQ_FALLING)
+
+	def _irq(self, pin):
+
+		if pin is self.pin: self.irq = True
 
 	def get_avg(self):
 
@@ -162,20 +153,15 @@ class display:
 
 	def get_time(self, now = None):
 
-		if now is None: now = time() + self.tz() * 3600
-		else: now = now + self.tz() * 3600
-
-		return localtime(now)[0:6]
-
-	def on_interrupt(self, pin):
-
-		if pin is self.pin: self.irq = True
+		return localtime(self.time(now))[0:6]
 
 	def on_refresh(self, now = None):
 
-		if now is None: now = time()
+		if self.disp is None: return
 
 		if self.page == 0:
+
+			if now is None: now = time()
 
 			temp, rh = self.get_avg()
 			t = self.get_time(now)
@@ -216,6 +202,7 @@ class display:
 			inc = 0
 
 		if self.irq:
+
 			self.irq = False
 			btn = True
 
@@ -239,7 +226,6 @@ class display:
 		if self.on and now >= self.down:
 
 			self.disp.backlight(False)
-
 			self.on = False
 			self.page = 0
 			self.last = 0

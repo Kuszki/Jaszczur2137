@@ -35,9 +35,9 @@ class server:
 			else: s.settimeout(3)
 
 			try: self.recv(s)
-			except: gc.collect()
-			else: gc.collect()
-			finally: s.close()
+			finally:
+				s.close()
+				gc.collect()
 
 	def recv(self, sock):
 
@@ -62,8 +62,6 @@ class server:
 		else:
 			code = b'405 Method Not Allowed'
 			site = etag = None
-
-		del buff; gc.collect()
 
 		if site: code = self.resp(site, par, etag, sock)
 
@@ -133,7 +131,6 @@ class server:
 				else: sock.sendall(chunk)
 
 			res.close()
-			gc.collect()
 
 	def get(self, req, sock):
 
@@ -324,7 +321,3 @@ class server:
 	def defsite(self, site, callback):
 
 		self.sites[site] = callback
-
-	def rmsite(self, site):
-
-		del self.sites[site]

@@ -453,9 +453,11 @@ class driver:
 
 		return self.tasks
 
-	def get_tzone(self):
+	def get_time(self, now = None):
 
-		return self.tzone
+		if now is None: now = time()
+
+		return now + self.tzone * 3600
 
 	def get_uids(self, v):
 

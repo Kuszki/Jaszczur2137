@@ -26,12 +26,9 @@ try: p = dthsens(DHT22(Pin(26)), 'tP', 'hP', var)
 except: p = None
 else: sens.update(p.sensors())
 
-i2c = I2C(0, scl = Pin(18), sda = Pin(19))
-btn = Pin(27, Pin.IN)
-
 e = encoder(Pin(32, Pin.IN), Pin(33, Pin.IN))
 d = driver(outs, sens, var)
-i = display(i2c, btn, e, l, p, d.get_tzone)
+i = display(I2C(0, scl = Pin(18), sda = Pin(19)), Pin(27, Pin.IN), e, l, p, d.get_time)
 s = server(80)
 
 s.defsite('outputs.json', lambda v: dumps(d.get_outputs()))
@@ -50,8 +47,6 @@ s.defsite('taskup', lambda v: d.set_tasks(v))
 s.defsite('codeup', lambda v: d.set_scripts(v))
 s.defsite('power', lambda v: d.set_power(v))
 s.defsite('driver', lambda v: d.set_driver(v))
-
-btn.irq(i.on_interrupt, Pin.IRQ_FALLING)
 
 while True:
 

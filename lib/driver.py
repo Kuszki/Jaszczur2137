@@ -367,7 +367,7 @@ class driver:
 
 		try: tmp = esp32.raw_temperature()
 		except: tmp = None
-		else: tmp = '%00.2f ℃' % ((tmp-32) / 1.8)
+		else: tmp = '%0.0f ℃' % ((tmp-32) / 1.8)
 
 		try: mem = gc.mem_free() / 1024
 		except: mem = None

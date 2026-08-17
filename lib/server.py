@@ -288,16 +288,12 @@ class server:
 
 		else: path = '/var/%s' % path
 
-		try:
+		cont = open(path, 'rb')
+		cont.seek(0, 2)
+		size = cont.tell()
+		cont.seek(0)
 
-			cont = open(path, 'rb')
-
-			cont.seek(0, 2)
-			size = cont.tell()
-			cont.seek(0)
-
-		except: raise
-		else: return cont, size
+		return cont, size
 
 	def mime(self, path):
 

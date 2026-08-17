@@ -1,11 +1,17 @@
 # coding=UTF-8
 
+from micropython import const
+
 import math
 
-INV = 0; INS = 1; EXP = 2; UNV = 3; UNF = 4;
-ERF = 5; AGC = 6; OPE = 7; UEN = 8; ZDV = 9;
+_INV = const(0); _INS = const(1);
+_EXP = const(2); _UNV = const(3);
+_UNF = const(4); _ERF = const(5);
+_AGC = const(6); _OPE = const(7);
+_UEN = const(8); _ZDV = const(9);
 
-NUM = 0; VAR = 1; FUN = 2; END = 3;
+_NUM = const(0); _VAR = const(1);
+_FUN = const(2); _END = const(3);
 
 CONSTS = {
 
@@ -70,17 +76,17 @@ class error(Exception):
 	]
 
 	EXPS = {
-		NUM: "wyrażenia",
-		VAR: "zmiennej",
-		FUN: "funkcji",
-		END: "końca skryptu",
+		_NUM: "wyrażenia",
+		_VAR: "zmiennej",
+		_FUN: "funkcji",
+		_END: "końca skryptu",
 	}
 
 	GOTS = {
-		NUM: "wartość '%s'",
-		VAR: "zmienną '%s'",
-		FUN: "funkcję '%s'",
-		END: "koniec skryptu",
+		_NUM: "wartość '%s'",
+		_VAR: "zmienną '%s'",
+		_FUN: "funkcję '%s'",
+		_END: "koniec skryptu",
 	}
 
 	UNKCODE = "Napotkano nieznany błąd"
@@ -95,9 +101,9 @@ class error(Exception):
 		else: es = None
 
 		if 'got' in params:
-			if params['got'] in (NUM, VAR, FUN):
+			if params['got'] in (_NUM, _VAR, _FUN):
 				gs = self.GOTS[params['got']] % params['value']
-			elif params['got'] == END:
+			elif params['got'] == _END:
 				gs = self.GOTS[params['got']]
 			else:
 				gs = "'%s'" % params['got']
@@ -227,8 +233,8 @@ def analyze(text):
 				column += 1
 				i += 1
 
-				if i >= n or text[i] <= " ": raise error(INV, line, column, value = f"{value}.")
-				if not text[i].isdigit(): raise error(INV, line, column, value = f"{value}.{text[i]}")
+				if i >= n or text[i] <= " ": raise error(_INV, line, column, value = f"{value}.")
+				if not text[i].isdigit(): raise error(_INV, line, column, value = f"{value}.{text[i]}")
 
 				mul = 0.1
 
@@ -240,7 +246,7 @@ def analyze(text):
 					column += 1
 					i += 1
 
-				tokens.append(nodus(NUM, line, column, value))
+				tokens.append(nodus(_NUM, line, column, value))
 
 				continue
 
@@ -251,8 +257,8 @@ def analyze(text):
 				column += 1
 				i += 1
 
-				if i >= n or text[i] <= " ": raise error(INV, line, column, value = f"{hours}:")
-				if not text[i].isdigit(): raise error(INV, line, column, value = f"{hours}:{text[i]}")
+				if i >= n or text[i] <= " ": raise error(_INV, line, column, value = f"{hours}:")
+				if not text[i].isdigit(): raise error(_INV, line, column, value = f"{hours}:{text[i]}")
 
 				minutes = 0
 				digits = 0
@@ -265,12 +271,12 @@ def analyze(text):
 					i += 1
 					digits += 1
 
-				if hours >= 24 or minutes >= 60: raise error(INV, line, column, value = f"{hours}:{minutes:02d}")
-				if digits != 2: raise error(INV, line, column, value = f"{hours}:{minutes}")
+				if hours >= 24 or minutes >= 60: raise error(_INV, line, column, value = f"{hours}:{minutes:02d}")
+				if digits != 2: raise error(_INV, line, column, value = f"{hours}:{minutes}")
 
 				value = hours * 60 + minutes
 
-			tokens.append(nodus(NUM, line, column, value))
+			tokens.append(nodus(_NUM, line, column, value))
 
 			continue
 
@@ -296,7 +302,7 @@ def analyze(text):
 			elif name == "not": tokens.append(nodus("!", line, column))
 			elif name == "and": tokens.append(nodus("&&", line, column))
 			elif name == "or": tokens.append(nodus("||", line, column))
-			else: tokens.append(nodus(VAR, line, column, name))
+			else: tokens.append(nodus(_VAR, line, column, name))
 
 			continue
 
@@ -322,9 +328,9 @@ def analyze(text):
 
 			continue
 
-		raise error(INS, line, column, value = c)
+		raise error(_INS, line, column, value = c)
 
-	tokens.append(nodus(END, line, column))
+	tokens.append(nodus(_END, line, column))
 
 	return tokens
 
@@ -340,7 +346,7 @@ def parse(tokens, pos = 0):
 		pos += 1
 
 		if expected is not None and token.typ != expected:
-			raise error(EXP, token.row, token.col, exp = expected, got = token.typ, value = token.value)
+			raise error(_EXP, token.row, token.col, exp = expected, got = token.typ, value = token.value)
 
 		return token
 
@@ -490,9 +496,9 @@ def parse(tokens, pos = 0):
 
 		token = peek()
 
-		if token.typ == NUM: return take()
+		if token.typ == _NUM: return take()
 
-		if token.typ == VAR:
+		if token.typ == _VAR:
 
 			ident = take()
 
@@ -513,7 +519,7 @@ def parse(tokens, pos = 0):
 
 			take(")")
 
-			call = nodus(FUN, ident.row, ident.col, ident.value)
+			call = nodus(_FUN, ident.row, ident.col, ident.value)
 			call.children = args
 
 			return call
@@ -527,12 +533,12 @@ def parse(tokens, pos = 0):
 			return node
 
 		if token.typ == ")":
-			raise error(EXP, token.row, token.col, got = token.typ, exp = NUM)
+			raise error(_EXP, token.row, token.col, got = token.typ, exp = _NUM)
 
-		raise error(UEN, token.row, token.col)
+		raise error(_UEN, token.row, token.col)
 
 	tree = expression()
-	take(END)
+	take(_END)
 
 	return tree
 
@@ -541,27 +547,27 @@ def compute(node, var = None, fun = None):
 	if var is None: var = dict()
 	if fun is None: fun = dict()
 
-	if node.typ == NUM: return node.value
+	if node.typ == _NUM: return node.value
 
-	if node.typ == VAR:
+	if node.typ == _VAR:
 
 		if node.value in var: return var[node.value]
 		if node.value in CONSTS: return CONSTS[node.value]
 
-		raise error(UNV, node.row, node.col, value = node.value)
+		raise error(_UNV, node.row, node.col, value = node.value)
 
-	if node.typ == FUN:
+	if node.typ == _FUN:
 
 		if node.value == "iif":
 
-			if len(node.children) != 3: raise error(AGC, node.row, node.col, value = node.value)
+			if len(node.children) != 3: raise error(_AGC, node.row, node.col, value = node.value)
 
 			if compute(node.children[0], var, fun): return compute(node.children[1], var, fun)
 			else: return compute(node.children[2], var, fun)
 
 		if node.value == "case":
 
-			if len(node.children) < 3 or len(node.children) % 2 == 0: raise error(AGC, node.row, node.col, value = node.value)
+			if len(node.children) < 3 or len(node.children) % 2 == 0: raise error(_AGC, node.row, node.col, value = node.value)
 
 			for i in range(0, len(node.children) - 1, 2):
 				if compute(node.children[i], var):
@@ -575,9 +581,9 @@ def compute(node, var = None, fun = None):
 			if node.value in fun: return fun[node.value](*args)
 			if node.value in FUNCTS: return FUNCTS[node.value](*args)
 
-		except Exception as e: raise error(ERF, node.row, node.col, value = node.value, text = str(e))
+		except Exception as e: raise error(_ERF, node.row, node.col, value = node.value, text = str(e))
 
-		raise error(UNF, node.row, node.col, value = node.value)
+		raise error(_UNF, node.row, node.col, value = node.value)
 
 	if node.typ == "!": return not compute(node.children[0], var, fun)
 
@@ -621,9 +627,9 @@ def compute(node, var = None, fun = None):
 		if node.typ == ">=": return a >= b
 
 	except Exception as e:
-		raise error(OPE, node.row, node.col, text = str(e), a = a, b = b, op = node.typ)
+		raise error(_OPE, node.row, node.col, text = str(e), a = a, b = b, op = node.typ)
 
-	raise error(INS, node.row, node.col, value = node.typ)
+	raise error(_INS, node.row, node.col, value = node.typ)
 
 def validate(text, var = None, fun = None):
 
@@ -639,25 +645,25 @@ def validate(text, var = None, fun = None):
 
 def checknode(node, var = None, fun = None):
 
-	if node.typ == VAR:
+	if node.typ == _VAR:
 		if node.value not in CONSTS and (var is None or node.value not in var):
-			raise error(UNV, node.row, node.col, value = node.value)
+			raise error(_UNV, node.row, node.col, value = node.value)
 
-	if node.typ == FUN and node.value not in ( "iif", "case" ):
+	if node.typ == _FUN and node.value not in ( "iif", "case" ):
 		if node.value not in FUNCTS and (fun is None or node.value not in fun):
-			raise error(UNF, node.row, node.col, value = node.value)
+			raise error(_UNF, node.row, node.col, value = node.value)
 
 	if node.value == "iif":
 		if len(node.children) != 3:
-			raise error(AGC, node.row, node.col, value = node.value)
+			raise error(_AGC, node.row, node.col, value = node.value)
 
 	if node.value == "case":
 		if len(node.children) < 3 or len(node.children) % 2 == 0:
-			raise error(AGC, node.row, node.col, value = node.value)
+			raise error(_AGC, node.row, node.col, value = node.value)
 
 	if len(node.children) == 2 and(node.typ == "/" or node.typ == "%"):
-		if node.children[1].typ == NUM and node.children[1].value == 0:
-			raise error(ZDV, node.row, node.col)
+		if node.children[1].typ == _NUM and node.children[1].value == 0:
+			raise error(_ZDV, node.row, node.col)
 
 	for n in node.children: checknode(n, var, fun)
 

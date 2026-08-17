@@ -2,6 +2,7 @@
 
 from ntptime import settime
 from time import sleep
+
 import network, json
 
 def configure():
@@ -14,34 +15,42 @@ def configure():
 		net = network.WLAN(network.STA_IF)
 		con = conf['client']
 
-		net.active(bool(int(con['on'])))
-		net.config(pm = net.PM_POWERSAVE)
-
-		if 'name' in con:
-			try: net.config(dhcp_hostname = con['name'])
-			except: pass
+		net.active(con.get('on', True))
 
 		if net.active():
-			try: net.connect(con['ssid'], con['pass'])
-			except: pass
 
-			while not net.isconnected(): sleep(1)
+			net.config(hostname = con['name'])
+			net.config(pm = net.PM_PERFORMANCE)
+			net.connect(con['ssid'], con['pass'])
 
 	if 'access' in conf:
 
 		net = network.WLAN(network.AP_IF)
 		con = conf['access']
 
-		net.active(bool(int(con['on'])))
+		net.active(con.get('on', True))
 
 		if net.active(): net.config(\
-			essid = con['ssid'], password = con['pass'], \
-			authmode = network.AUTH_WPA_WPA2_PSK, \
-			dhcp_hostname = con['name'])
+			ssid = con['ssid'], \
+			key = con['pass'], \
+			hostname = con['name'], \
+			security = network.SEC_WPA2, \
+			pm = net.PM_PERFORMANCE)
 
 	if 'sync' in conf:
 
-		synctime(conf['sync']["try"], conf['sync']["sleep"])
+		net = network.WLAN(network.STA_IF)
+		con = conf['sync']
+
+		tr = st = con.get("try", 10)
+		sl = con.get("sleep", 6)
+
+		while st > 0 and not net.isconnected():
+
+			sleep(sl)
+			st -= 1
+
+		if net.isconnected(): synctime(tr, sl)
 
 def synctime(st = 6, sl = 10):
 
@@ -54,11 +63,3 @@ def synctime(st = 6, sl = 10):
 			st -= 1
 
 		else: st = 0
-
-def sta_active():
-
-	return network.WLAN(network.STA_IF).active()
-
-def ap_active():
-
-	return network.WLAN(network.AP_IF).active()

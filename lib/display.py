@@ -2,14 +2,21 @@
 
 from time import time, localtime, sleep_us
 from network import WLAN, STA_IF
+from micropython import const
 from machine import Pin
 
-class HD44780_via_PCF8574:
+_PCF_RS = const(0x01)
+_PCF_RW = const(0x02)
+_PCF_EN = const(0x04)
+_PCF_BL = const(0x08)
 
-	PCF_RS = 0x01
-	PCF_RW = 0x02
-	PCF_EN = 0x04
-	PCF_BL = 0x08
+_INFO = const(' %04.1f\xDFC   %04.1f%% ')
+_DATE = const('%02d.%02d.%04d %02d:%02d')
+_TMP = const('%04.1f\xDFC    %04.1f\xDFC')
+_HUM = const('%04.1f%%      %04.1f%%')
+_FMT = const('%-16s')
+
+class HD44780_via_PCF8574:
 
 	_row_offsets = [None] * 4
 
@@ -111,21 +118,13 @@ class HD44780_via_PCF8574:
 
 		i2cData = halfByte << 4
 
-		if isData: i2cData |= self.PCF_RS
-		if enable: i2cData |= self.PCF_EN
-		if self._backlight: i2cData |= self.PCF_BL
+		if isData: i2cData |= _PCF_RS
+		if enable: i2cData |= _PCF_EN
+		if self._backlight: i2cData |= _PCF_BL
 
 		self.i2c.writeto(self._i2cAddr, i2cData.to_bytes(1, 'big'))
 
 class display:
-
-	INFO = ' %04.1f' + chr(223) + 'C   %04.1f%% '
-	DATE = '%02d.%02d.%04d %02d:%02d'
-
-	TMP = '%04.1f' + chr(223) + 'C    %04.1f' + chr(223) + 'C'
-	HUM = '%04.1f%%      %04.1f%%'
-
-	FMT = '%-16s'
 
 	def __init__(self, i2c, pin, enc, dth_l, dth_p, tz):
 
@@ -181,9 +180,9 @@ class display:
 			t = localtime(t)[0:6]
 
 			self.disp.moveto(0, 0)
-			self.disp.print(self.DATE % (t[2], t[1], t[0], t[3], t[4]))
+			self.disp.print(_DATE % (t[2], t[1], t[0], t[3], t[4]))
 			self.disp.moveto(1, 0)
-			self.disp.print(self.INFO % (temp, rh))
+			self.disp.print(_INFO % (temp, rh))
 
 		elif self.page == 1:
 
@@ -200,18 +199,18 @@ class display:
 				t_r = h_r = 0.0
 
 			self.disp.moveto(0, 0)
-			self.disp.print(self.TMP % (t_l, t_r))
+			self.disp.print(_TMP % (t_l, t_r))
 			self.disp.moveto(1, 0)
-			self.disp.print(self.HUM % (h_l, h_r))
+			self.disp.print(_HUM % (h_l, h_r))
 
 		elif self.page == 2:
 
 			net = WLAN(STA_IF)
 
 			self.disp.moveto(0, 0)
-			self.disp.print(self.FMT % net.config('hostname'))
+			self.disp.print(_FMT % net.config('hostname'))
 			self.disp.moveto(1, 0)
-			self.disp.print(self.FMT % net.ifconfig()[0])
+			self.disp.print(_FMT % net.ifconfig()[0])
 
 	def on_loop(self):
 

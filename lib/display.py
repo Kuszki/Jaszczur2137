@@ -1,16 +1,17 @@
 # coding=UTF-8
 
 from time import time, localtime, sleep_us
+from network import WLAN, STA_IF
 from micropython import const
 from machine import Pin
 
 _INFO = const(' %04.1f\xDFC   %04.1f%% ')
 _DATE = const('%02d.%02d.%04d %02d:%02d')
-
 _TMP = const('%04.1f\xDFC    %04.1f\xDFC')
 _HUM = const('%04.1f%%      %04.1f%%')
+_FMT = const('%-16s')
 
-_PAGES = const(2)
+_PAGES = const(3)
 
 class HD44780_via_PCF8574:
 
@@ -189,6 +190,15 @@ class display:
 			self.disp.print(_TMP % (t_l, t_r))
 			self.disp.moveto(1, 0)
 			self.disp.print(_HUM % (h_l, h_r))
+
+		elif self.page == 2:
+
+			net = WLAN(STA_IF)
+
+			self.disp.moveto(0, 0)
+			self.disp.print(_FMT % net.config('hostname'))
+			self.disp.moveto(1, 0)
+			self.disp.print(_FMT % net.ifconfig()[0])
 
 	def on_loop(self):
 

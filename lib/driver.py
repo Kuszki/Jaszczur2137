@@ -565,7 +565,7 @@ class driver:
 
 	def on_loop(self):
 
-		if self.reboot: return machine.reset()
+		if self.reboot: return machine.soft_reset()
 		else: now = time.time()
 
 		if now - self.last_loop >= 1:

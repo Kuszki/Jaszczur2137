@@ -1,4 +1,4 @@
-from machine import I2C, Pin
+from machine import I2C, Pin, soft_reset
 from json import dumps, load
 from dht import DHT22
 
@@ -53,3 +53,5 @@ while True:
 	d.on_loop()
 	s.accept(333)
 	i.on_loop()
+
+soft_reset()

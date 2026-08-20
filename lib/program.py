@@ -18,11 +18,11 @@ with open("/etc/outs.json", "r") as f:
 	for k, p in load(f).items():
 		outs[k] = output(k, Pin(p, Pin.OUT), var)
 
-try: l = dthsens(DHT22(Pin(25)), 'tL', 'hL', var)
+try: l = dthsens(DHT22(Pin(26)), 'tL', 'hL', var)
 except: l = None
 else: sens.update(l.sensors())
 
-try: p = dthsens(DHT22(Pin(26)), 'tP', 'hP', var)
+try: p = dthsens(DHT22(Pin(25)), 'tP', 'hP', var)
 except: p = None
 else: sens.update(p.sensors())
 
@@ -50,8 +50,9 @@ s.defsite('driver', lambda v: d.set_driver(v))
 
 while True:
 
+	s.accept(50, 1)
+
 	d.on_loop()
-	s.accept(333)
 	i.on_loop()
 
 soft_reset()

@@ -20,13 +20,12 @@ class dthsens:
 		self.hobj.value = sens.humidity
 		self.hobj.update = self.update
 
-		self.tsens = sensor(tname, self.tobj, var)
-		self.hsens = sensor(hname, self.hobj, var)
+		self.tsens = sensor(tname, self.tobj, var, 10)
+		self.hsens = sensor(hname, self.hobj, var, 10)
 
-	def update(self):
+	def update(self, now = None):
 
-		try: now = time()
-		except: now = 0
+		if now is None: now = time()
 
 		if now - self.last >= 2:
 			self.sens.measure()

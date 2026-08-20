@@ -2,6 +2,7 @@
 	"time": {
 		"zone": 0,
 		"loop": 30,
+		"meas": 5,
 		"sync": 1800
 	},
 	"plot": {

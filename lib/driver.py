@@ -6,56 +6,17 @@ class driver:
 
 	def __init__(self, outs, sens, var):
 
-		try: self.tasks = json.load(open('/etc/jobs.json', 'r'))
-		except: self.tasks = dict()
-		else: gc.collect()
-		finally: self.lastt = 0
+		self.tzone = 0
+		self.loop = 30
+		self.meas = 5
+		self.sync = 36000
+		self.psize = 72
+		self.page = 259200
+		self.lsize = 25
+		self.lage = 259200
 
-		for k in self.tasks:
-			if int(k) >= self.lastt:
-				self.lastt = int(k) + 1
-
-		try: settings = json.load(open('/etc/driver.json', 'r'))
-		except: settings = dict()
-		else: gc.collect()
-
-		try: self.driver = settings['main']['driver']
-		except: self.driver = False
-
-		try: self.tzone = settings['time']['zone']
-		except: self.tzone = 0
-
-		try: self.loop = settings['time']['loop']
-		except: self.loop = 30
-
-		try: self.meas = settings['time']['meas']
-		except: self.meas = 30
-
-		try: self.sync = settings['time']['sync']
-		except: self.sync = 36000
-
-		try: self.psize = settings['plot']['size']
-		except: self.psize = 72
-
-		try: self.page = settings['plot']['age']
-		except: self.page = 259200
-
-		try: self.lsize = settings['logs']['size']
-		except: self.lsize = 25
-
-		try: self.lage = settings['logs']['age']
-		except: self.lage = 259200
-
-		try: self.wtok = settings['outdor']['token']
-		except: self.wtok = str()
-
-		try: self.wpla = settings['outdor']['place']
-		except: self.wpla = str()
-
-		del settings; gc.collect()
-
-		self.ptime = int(self.page / self.psize)
-		self.ltime = int(self.lage / self.lsize)
+		self.tasks = dict()
+		self.lastt = 0
 
 		self.reboot = False
 
@@ -66,13 +27,68 @@ class driver:
 		self.tp_save = 0
 		self.tl_save = 0
 
+		self.load_settings()
+		self.load_tasks()
+
 		self.outs = outs
 		self.sens = sens
 		self.var = var
 
+		self.ptime = int(self.page / self.psize)
+		self.ltime = int(self.lage / self.lsize)
+
 		self.last_boot = self.on_time(time.time())
 		self.save_logs('boot', None, machine.reset_cause())
 		self.on_startup(self.last_boot)
+		self.on_update(time.time())
+
+	def load_settings(self):
+
+		try:
+			with open('/etc/driver.json', 'r') as f:
+
+				settings = json.load(f)
+
+				try: self.tzone = settings['time']['zone']
+				except: pass
+
+				try: self.loop = settings['time']['loop']
+				except: pass
+
+				try: self.meas = settings['time']['meas']
+				except: pass
+
+				try: self.sync = settings['time']['sync']
+				except: pass
+
+				try: self.psize = settings['plot']['size']
+				except: pass
+
+				try: self.page = settings['plot']['age']
+				except: pass
+
+				try: self.lsize = settings['logs']['size']
+				except: pass
+
+				try: self.lage = settings['logs']['age']
+				except: pass
+
+		except: pass
+		finally: gc.collect()
+
+	def load_tasks(self):
+
+		try:
+			with open('/etc/jobs.json', 'r') as f:
+
+				self.tasks = json.load()
+
+			for k in self.tasks:
+				if int(k) >= self.lastt:
+					self.lastt = int(k) + 1
+
+		except: pass
+		finally: gc.collect()
 
 	def save_settings(self):
 
@@ -129,8 +145,11 @@ class driver:
 
 		if now == None: now = time.time()
 
-		try: logs = json.load(open('/etc/logs.json', 'r'))
-		except: logs = list()
+		try:
+			with open('/etc/logs.json', 'r') as f:
+				logs = json.load(f)
+		except:
+			logs = list()
 
 		while len(logs) >= self.lsize: logs.pop(-1)
 
@@ -325,6 +344,15 @@ class driver:
 					num = num + 1
 				else: ok = False
 
+			if 'meas' in v:
+
+				val = int(v['meas'])
+
+				if 1 <= val <= 60:
+					self.meas = val
+					num = num + 1
+				else: ok = False
+
 			if 'save' in v:
 
 				self.save_settings()
@@ -379,28 +407,28 @@ class driver:
 		t = t + self.tzone * 3600
 		t = time.localtime(t)[0:6]
 
-		udays = dt / 86400; dt %= 86400
-		uhours = dt / 3600; dt %= 3600
-		umins = dt / 60; dt %= 60
+		udays = dt // 86400; dt %= 86400
+		uhours = dt // 3600; dt %= 3600
+		umins = dt // 60; dt %= 60
 
 		return \
 		{
-			'Godzina': '%02d:%02d:%02d' % (t[3], t[4], t[5]),
-			'Data': '%02d.%02d.%04d' % (t[2], t[1], t[0]),
-			'Czas pracy': '%dd %dh %dm' % (udays, uhours, umins),
+			'time': '%02d:%02d:%02d' % (t[3], t[4], t[5]),
+			'date': '%02d.%02d.%04d' % (t[2], t[1], t[0]),
+			'uptime': '%dd %dh %dm' % (udays, uhours, umins),
 
-			'Dostępna pamięć RAM': mem,
-			'Temperatura CPU': tmp,
+			'ram': mem,
+			'tmp': tmp,
 		}
 
 	def get_timing(self):
 
 		return \
 		{
-			'Uruchomienie': self.last_boot,
-			'Czas': self.last_sync,
-			'Wykres': self.tp_save,
-			'Historia': self.tl_save
+			'boot': self.last_boot,
+			'sync': self.last_sync,
+			'plot': self.tp_save,
+			'hist': self.tl_save
 		}
 
 	def get_params(self):
@@ -409,14 +437,15 @@ class driver:
 		{
 			'tzone': self.tzone,
 			'loop': self.loop,
+			'meas': self.meas,
 			'psize': self.psize,
 			'lsize': self.lsize,
 
-			'page': int(self.page / 86400),
-			'lage': int(self.lage / 86400),
-			'ptime': int(self.ptime / 60),
+			'page': int(self.page // 86400),
+			'lage': int(self.lage // 86400),
+			'ptime': int(self.ptime // 60),
 
-			'sync': int(self.sync / 60),
+			'sync': int(self.sync // 60),
 		}
 
 	def get_conf(self):
@@ -428,6 +457,7 @@ class driver:
 				'zone': self.tzone,
 				'loop': self.loop,
 				'sync': self.sync,
+				'meas': self.meas,
 			},
 			'plot':
 			{
@@ -493,13 +523,14 @@ class driver:
 
 				with open(path, 'r') as f: v = json.load(f)
 
-				if now - v['last'] >= self.ptime and v['data'][-1]['y'] != None:
-					v['data'].append(null); save = True
-
 				if now - v['data'][-1]['t'] >= self.page: v['data'].clear()
 				else:
+
 					while now - v['data'][0]['t'] >= self.page:
 						v['data'].pop(0); save = True
+
+					if now - v['last'] >= self.ptime and v['data'][-1]['y'] != None:
+						v['data'].append(null); save = True
 
 				if not len(v['data']): os.remove(path)
 				elif save:
@@ -540,7 +571,9 @@ class driver:
 
 	def on_logs(self, now):
 
-		try: logs = json.load(open('/etc/logs.json', 'r'))
+		try:
+			with open('/etc/logs.json', 'r') as f:
+				logs = json.load(f)
 		except: return None
 		else: save = False
 		finally:
@@ -563,38 +596,44 @@ class driver:
 			with open('/etc/logs.json', 'w') as f:
 				json.dump(logs, f)
 
+	def on_update(self, now):
+
+		t = now + self.tzone * 3600
+		t = time.localtime(t)
+
+		self.var['t'] = 60 * t[3] + t[4]
+
+		self.var['h'] = t[3]
+		self.var['m'] = t[4]
+
+		self.var['day'] = t[2]
+		self.var['mon'] = t[1]
+		self.var['year'] = t[0]
+
+		self.var['wday'] = t[6] + 1
+
 	def on_loop(self):
 
-		if self.reboot: return machine.soft_reset()
+		if self.reboot: return machine.reset()
 		else: now = time.time()
-
-		if now - self.last_loop >= 1:
-			for s in self.sens.values():
-				try: s.update()
-				except: pass
 
 		if now - self.last_sync >= self.sync:
 			now = self.on_time(now)
 
+		if now - self.last_meas >= self.meas:
+
+			for s in self.sens.values():
+				try: s.update()
+				except: pass
+
+			self.last_meas = now
+
 		if now - self.last_loop >= self.loop:
 
-			dt = now + self.tzone * 3600
-			t = time.localtime(dt)[0:7]
+			if len(self.tasks): self.on_task(now)
 
-			self.var['t'] = t[3]*60 + t[4]
-
-			self.var['h'] = t[3]
-			self.var['m'] = t[4]
-
-			self.var['day'] = t[2]
-			self.var['mon'] = t[1]
-			self.var['year'] = t[0]
-
-			self.var['wday'] = t[6] + 1
-
-			self.last_loop = now
-
-			if len(self.tasks) > 0: self.on_task(now)
+			try: self.on_update(now)
+			except: pass
 
 			for o in self.outs.values():
 				if not o.driver(): continue
@@ -606,9 +645,13 @@ class driver:
 					self.save_logs('err', o.name(), str(e))
 					o.update(driver = False, state = o.default())
 					old = new = None
+				finally:
+					gc.collect()
 
 				if old != new:
 					self.save_logs('pwr', o.name(), int(new))
+
+			self.last_loop = now
 
 		if now - self.tp_save >= self.ptime:
 			self.on_hist(now)

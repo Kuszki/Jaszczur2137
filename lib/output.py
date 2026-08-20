@@ -2,25 +2,16 @@
 
 from json import load, dump
 from parser import script
+from gc import collect
 
 class output:
 
 	def __init__(self, uid, out, var):
 
-		try: conf = load(open('/outs/%s.json' % uid, 'r'))
-		except: conf = dict()
-
-		try: self.code = script(conf['code'], var, None, True)
-		except: self.code = script("0", var, None, True)
-
-		try: self.drv = int(conf['driver'])
-		except: self.drv = False
-
-		try: self.val = int(conf['default'])
-		except: self.val = False
-
-		try: self.nam = str(conf['name'])
-		except: self.nam = uid
+		self.drv = False
+		self.code = None
+		self.val = False
+		self.nam = uid
 
 		self.out = out
 		self.uid = uid
@@ -28,10 +19,12 @@ class output:
 		self.vde = self.val
 		self.cha = False
 
+		self.load()
+
 		out.value(self.val)
 		var[uid] = self.val
 
-	def __str__(self): return "ON" if self.status() else "OFF"
+	def __str__(self): return "ON" if bool(self) else "OFF"
 
 	def __bool__(self): return self.status()
 
@@ -87,6 +80,28 @@ class output:
 			'default': self.default()
 
 		}
+
+	def load(self):
+
+		try:
+			with open('/outs/%s.json' % self.uid, 'r') as f:
+
+				conf = load(f)
+
+				try: self.code = script(conf['code'], self.var, None, True)
+				except: self.code = script("0", self.var, None, True)
+
+				try: self.drv = int(conf['driver'])
+				except: pass
+
+				try: self.val = int(conf['default'])
+				except: pass
+
+				try: self.nam = str(conf['name'])
+				except: pass
+
+		except: pass
+		finally: collect()
 
 	def save(self, force = False):
 

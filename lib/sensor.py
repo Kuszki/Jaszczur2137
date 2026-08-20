@@ -1,16 +1,20 @@
 # coding=UTF-8
 
+from micropython import const
+from gc import collect
 from json import load
+
+_FMT = const('%0.1f %s')
 
 class mavg:
 
 	def __init__(self, size = 30):
 
-		self.size = size
 		self.buf = [0] * size
 		self.pos = 0
 		self.count = 0
 		self.sum = 0
+		self.size = size
 
 	def update(self, value):
 
@@ -19,7 +23,8 @@ class mavg:
 		self.buf[self.pos] = value
 		self.sum += value
 
-		self.pos = (self.pos + 1) % self.size
+		self.pos += 1
+		self.pos %= self.size
 
 		if self.count < self.size:
 			self.count += 1
@@ -32,26 +37,17 @@ class mavg:
 
 class sensor:
 
-	def __init__(self, uid, sen, var):
+	def __init__(self, uid, sen, var, avg = 15):
 
-		try: conf = load(open('/sens/%s.json' % uid, 'r'))
-		except: conf = dict()
-
-		try: self.nam = str(conf['name'])
-		except: self.nam = uid
-
-		try: self.uni = str(conf['unit'])
-		except: self.uni = str()
-
-		try: self.fmt = str(conf['format'])
-		except: self.fmt = "%0.1f %s"
-
-		self.avg = mavg(15)
+		self.avg = mavg(avg)
 		self.sen = sen
 		self.uid = uid
 		self.var = var
+		self.nam = uid
+		self.uni = str()
+		self.fmt = _FMT
 
-		self.update()
+		self.load()
 
 	def __str__(self): return self.fmt % (self.value(), self.uni)
 
@@ -74,6 +70,25 @@ class sensor:
 
 		self.var[self.uid] = val
 
+	def load(self):
+
+		try:
+			with open('/sens/%s.json' % self.uid, 'r') as f:
+
+				conf = load(f)
+
+				try: self.nam = str(conf['name'])
+				except: pass
+
+				try: self.uni = str(conf['unit'])
+				except: pass
+
+				try: self.fmt = str(conf['format'])
+				except: pass
+
+		except: pass
+		finally: collect()
+
 	def dump(self): return {
 
 			'uid': self.id(),
@@ -82,5 +97,4 @@ class sensor:
 			'unit': self.unit(),
 			'format': self.format(),
 			'text': str(self)
-
 		}

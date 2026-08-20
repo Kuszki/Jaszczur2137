@@ -1,3 +1,16 @@
+let messages =
+{
+	'time': 'Godzina',
+	'date': 'Data',
+	'uptime': 'Czas pracy',
+	'ram': 'Dostępna pamięć RAM',
+	'tmp': 'Temperatura CPU',
+	'boot': 'Uruchomienie',
+	'sync': 'Czas',
+	'plot': 'Wykres',
+	'hist': 'Historia'
+};
+
 function onLoad()
 {
 	$.ajaxSetup({ 'timeout': 5000 });
@@ -48,19 +61,22 @@ function onTimetab(data, parrent)
 	const table = document.createElement("table");
 
 	const off = Date.UTC(2000, 0, 1);
+	const keys = Object.keys(data);
 
-	const keys = Object.keys(data).sort();
-	for (const k in keys)
+	for (const i in keys)
 	{
-		let temp = data[keys[k]];
+		const k = keys[i]
+		const temp = data[k];
 
 		const time = new Date(temp * 1000 + off);
 		const sdate = time.toLocaleString('pl');
+
+		const p = messages[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
 		const v = temp != 0 ? sdate : '-'.repeat(32);
 
 		const tr = document.createElement("tr");
 
-		genCell(tr, keys[k]);
+		genCell(tr, p);
 		genCell(tr, v);
 
 		table.appendChild(tr);
@@ -75,8 +91,8 @@ function onDatatab(data, parrent)
 	const table = document.createElement("table");
 
 	const off = Date.UTC(2000, 0, 1);
+	const keys = Object.keys(data);
 
-	const keys = Object.keys(data).sort();
 	for (const i in keys)
 	{
 		const k = keys[i];
@@ -84,7 +100,7 @@ function onDatatab(data, parrent)
 		if (data[k] != null) temp = data[k].toString();
 		else temp = 'Brak danych';
 
-		const p = k.charAt(0).toUpperCase() + k.slice(1);
+		const p = messages[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
 		const v = temp.charAt(0).toUpperCase() + temp.slice(1);
 
 		const tr = document.createElement("tr");

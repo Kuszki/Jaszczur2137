@@ -9,11 +9,21 @@ class server:
 
 	def __init__(self, port = 80):
 
-		try: self.users = json.load(open('/etc/users.json', 'r'))
-		except: self.users = dict()
+		try:
+			with open('/etc/users.json', 'r') as f:
+				self.users = json.load(f)
+		except:
+			self.users = dict()
+		finally:
+			gc.collect()
 
-		try: self.etags = json.load(open('/etc/etags.json', 'r'))
-		except: self.etags = dict()
+		try:
+			with open('/etc/etags.json', 'r') as f:
+				self.etags = json.load(f)
+		except:
+			self.etags = dict()
+		finally:
+			gc.collect()
 
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -26,56 +36,92 @@ class server:
 
 		self.sites = dict()
 
-	def accept(self, wait = 1000):
+	def accept(self, wait = 1000, timeout = 3):
 
 		if self.poll.poll(wait):
 
 			try: s = self.sock.accept()[0]
-			except: return None
-			else: s.settimeout(3)
+			except: return False
+			else: s.settimeout(timeout)
 
 			try: self.recv(s)
+			except: return False
 			finally:
 				s.close()
 				gc.collect()
 
+			return True
+
+	def head(self, sock, resp):
+
+		sock.sendall(b'HTTP/1.1 ')
+		sock.sendall(resp)
+		sock.sendall(b'\r\n')
+
+	def param(self, sock, key, value):
+
+		sock.sendall(key)
+		sock.sendall(b': ')
+		sock.sendall(value)
+		sock.sendall(b'\r\n')
+
+	def error(self, sock, code):
+
+		self.head(sock, code)
+		self.param(sock, b'Connection', b'close')
+		self.param(sock, b'WWW-Authenticate', b'Basic')
+		sock.sendall(b'\r\n')
+
+	def uncha(self, sock, etag):
+
+		self.head(sock, b'304 Not Modified')
+		self.param(sock, b'Connection', b'close')
+		self.param(sock, b'Cache-Control', b'max-age=31536000')
+		self.param(sock, b'ETag', etag)
+		sock.sendall(b'\r\n')
+
 	def recv(self, sock):
 
-		try: buff = sock.recv(1460)
-		except: return None
+		buff = sock.recv(1460)
+		stop = buff.find(b'\r\n\r\n')
+		start = len(buff) - 3
 
-		while buff.find(b'\r\n\r\n') == -1:
-			if not buff: raise MemoryError
-			else: buff += sock.recv(1460)
+		while stop == -1:
 
-		if not self.auth(buff):
+			if start < 0: start = 0
+
+			old = len(buff)
+			buff += sock.recv(1460)
+			new = len(buff)
+
+			if old == new: break
+
+			stop = buff.find(b'\r\n\r\n', start)
+			start = new - 3
+
+		if stop == -1: raise ValueError('incomplete request')
+		else: stop = stop + 2
+
+		if not self.auth(buff, stop):
 			code = b'401 Unauthorized'
 			site = etag = None
 
 		elif buff.startswith(b'GET /'):
-			site, par, etag = self.get(buff, sock)
+			site, par, etag = self.get(sock, buff, stop)
 
 		elif buff.startswith(b'POST /'):
-			site, par = self.post(buff, sock)
+			site, par = self.post(sock, buff, stop)
 			etag = time.ticks_ms()
 
 		else:
 			code = b'405 Method Not Allowed'
 			site = etag = None
 
-		if site: code = self.resp(site, par, etag, sock)
+		if site: code = self.resp(sock, site, par, etag)
 
-		if etag == None:  etag = b'null'
-		else: etag = str(etag).encode()
+		if code is not None: self.error(sock, code)
 
-		if code: sock.sendall(\
-			b'HTTP/1.1 %s\r\n' \
-			b'ETag: %s\r\n'\
-			b'Connection: close\r\n' \
-			b'WWW-Authenticate: Basic\r\n' \
-			b'\r\n' % (code, etag))
-
-	def resp(self, site, par, etag, sock):
+	def resp(self, sock, site, par, etag):
 
 		if site in self.sites:
 			try:
@@ -84,18 +130,18 @@ class server:
 			except:
 				return b'406 Not Acceptable'
 			else:
-				gen = True;
+				gen = True
 
 		elif self.changed(site, etag):
 			try:
 				res, siz = self.site(site)
-				etag = self.etag(site)
+				etag = self.etags.get(site)
 			except:
 				return b'404 Not Found'
 			else:
-				gen = False;
+				gen = False
 
-		else: return b'304 Not Modified'
+		else: return self.uncha(sock, etag)
 
 		try: mim = self.mime(site)
 		except: mim = b'text/plain'
@@ -106,97 +152,105 @@ class server:
 		if type(siz) == str: siz = siz.encode()
 		else: siz = str(siz).encode()
 
-		if type(etag) == str: etag = etag.encode()
+		if gen or etag is None: cac = b'no-cache'
+		else: cac = b'max-age=31536000'
+
+		if etag is None: etag = str(time.ticks_ms()).encode()
+		elif type(etag) == str: etag = etag.encode()
 		else: etag = str(etag).encode()
 
-		try: sock.sendall(\
-			b'HTTP/1.1 200 OK\r\n' \
-			b'Connection: close\r\n' \
-			b'Content-Type: %s\r\n' \
-			b'Content-Length: %s\r\n' \
-			b'Content-Encoding: %s\r\n' \
-			b'ETag: %s\r\n' \
-			b'\r\n' % (mim, siz, enc, etag))
-		except:
-			return b'500 Internal Server Error'
+		self.head(sock, b'200 OK')
+		self.param(sock, b'Connection', b'close')
+		self.param(sock, b'Content-Type', mim)
+		self.param(sock, b'Content-Length', siz)
+		self.param(sock, b'Content-Encoding', enc)
+		self.param(sock, b'Cache-Control', cac)
+		self.param(sock, b'ETag', etag)
+		sock.sendall(b'\r\n')
 
 		if gen: sock.sendall(res)
 		else:
 
+			chunk = bytearray(1460)
+			view = memoryview(chunk)
+
 			while True:
 
-				chunk = res.read(1460)
+				try: n = res.readinto(view)
+				except: break
 
-				if not chunk: break
-				else: sock.sendall(chunk)
+				if n > 0: sock.sendall(view[:n])
+				else: break
 
 			res.close()
 
-	def get(self, req, sock):
+	def get(self, sock, req, stop):
 
-		e = req.find(b'\r\n')
+		e = req.find(b'\r\n', 0, stop)
 		a = req.find(b'GET /', 0, e) + 5
 		b = req.find(b' HTTP', a, e)
-		e = req.find(b'\r\n\r\n', b)
 
 		if a == 4 or b == -1 or a > b:
-			return str(), dict()
+			raise ValueError('incomplete request')
 
 		p = req.find(b'?', a, b)
 
 		if p != -1:
 
-			site = self.unquote(req[a:p])
+			site = req[a:p]
 			vlist = self.split(req[p+1:b])
 
 		else:
 
-			site = self.unquote(req[a:b])
+			site = req[a:b]
 			vlist = dict()
 
-		a = req.find(b'If-None-Match: ', b + 11, e) + 15
-		b = req.find(b'\r\n', a, e)
+		a = req.find(b'If-None-Match: ', b + 11, stop) + 15
+		b = req.find(b'\r\n', a, stop)
 
 		if a == 14 or b == -1 or a > b: etag = None
 		else: etag = req[a:b].decode()
 
 		if site == b'': site = 'index.html'
-		else: site = site.decode()
+		else: site = self.unquote(site).decode()
 
 		return site, vlist, etag
 
-	def post(self, req, sock):
+	def post(self, sock, req, stop):
 
-		e = req.find(b'\r\n')
+		e = req.find(b'\r\n', 0, stop)
 		a = req.find(b'POST /', 0, e) + 6
 		b = req.find(b' HTTP', a, e)
-		e = req.find(b'\r\n\r\n', e)
-		d = self.unquote
 
 		if a == 5 or b == -1 or a > b:
-			return str(), dict()
+			raise ValueError('incomplete request')
 
-		elif a == b: site = 'index.html'
-		else: site = d(req[a:b]).decode()
+		if a == b: site = 'index.html'
+		else: site = self.unquote(req[a:b]).decode()
 
-		j = req.find(b'Content-Type: application/json', b, e)
-		p = req.find(b'Content-Type: text/plain', b, e)
-
-		a = req.find(b'Content-Length: ', b, e) + 16
-		b = req.find(b'\r\n', a, e)
+		j = req.find(b'Content-Type: application/json', b, stop)
+		p = req.find(b'Content-Type: text/plain', b, stop)
+		a = req.find(b'Content-Length: ', b, stop) + 16
+		b = req.find(b'\r\n', a, stop)
 
 		if a == 15 or b == -1 or a > b:
-			return site, dict()
+			raise ValueError('incomplete request')
 
-		else:
-			try: leng = int(req[a:b])
-			except: return site, dict()
-			else: req = req[e+4:]
+		size = int(req[a:b])
+		req = req[stop + 2:]
+		left = size - len(req)
 
-		while len(req) != leng:
-			try: req += sock.recv(leng - len(req))
-			except: return site, dict()
-			if not req: raise MemoryError
+		while left > 0:
+
+			old = len(req)
+			req += sock.recv(left)
+			new = len(req)
+
+			if old == new: break
+			else: left = size - new
+
+		if left > 0:
+			raise ValueError('incomplete request')
 
 		if j != -1: vlist = json.loads(req)
 		elif p != -1: vlist = req.decode()
@@ -204,14 +258,13 @@ class server:
 
 		return site, vlist
 
-	def auth(self, req):
+	def auth(self, req, stop):
 
 		if not len(self.users): return True
 
-		s = req.find(b'\r\n') + 2
-		e = req.find(b'\r\n\r\n')
-		a = req.find(b'Authorization: Basic ', s, e) + 21
-		b = req.find(b'\r\n', a)
+		s = req.find(b'\r\n', 0, stop) + 2
+		a = req.find(b'Authorization: Basic ', s, stop) + 21
+		b = req.find(b'\r\n', a, stop)
 
 		if a == 20 or b == -1 or a > b: return False
 		else: auth = a2b_base64(req[a:b]).split(b':')
@@ -294,7 +347,7 @@ class server:
 
 	def mime(self, path):
 
-		if path.endswith(".gz"): path = path[:-3]
+		if path.endswith('.gz'): path = path[:-3]
 
 		if path.startswith('/var/'): mime = b'application/json'
 		elif path.endswith('.html'): mime = b'text/html'
@@ -307,16 +360,9 @@ class server:
 
 		return b'%s; charset=utf-8' % mime
 
-	def etag(self, path):
-
-		if path in self.etags: return self.etags[path]
-		else: return str(time.ticks_ms())
-
 	def changed(self, path, etag):
 
-		if etag == None: return True
-		elif path not in self.etags: return True
-		else: return etag != self.etags[path]
+		return etag is None or etag != self.etags.get(path)
 
 	def defsite(self, site, callback):
 

@@ -1,6 +1,7 @@
 {
 	"tzone":	1,
 	"loop":	30,
+	'meas':   5,
 	"sync":	30,
 	"psize":	72,
 	"page":	3,

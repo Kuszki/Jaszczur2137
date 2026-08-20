@@ -642,7 +642,7 @@ class driver:
 					old = o.status()
 					new = o.compute()
 				except Exception as e:
-					self.save_logs('err', o.name(), str(e))
+					self.save_logs('err', o.name(), e.args)
 					o.update(driver = False, state = o.default())
 					old = new = None
 				finally:

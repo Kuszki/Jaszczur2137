@@ -93,6 +93,7 @@ put src/logs.js
 put src/main.js
 put src/info.js
 put src/script.js
+put src/error.js
 
 put sens/hL.json
 put sens/tL.json

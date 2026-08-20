@@ -13,6 +13,8 @@ _UEN = const(8); _ZDV = const(9);
 _NUM = const(0); _VAR = const(1);
 _FUN = const(2); _END = const(3);
 
+_STR_ERROR = const(False)
+
 CONSTS = {
 
 	"e": math.e,
@@ -59,69 +61,6 @@ class nodus:
 
 		self.row = row
 		self.col = col
-
-class error(Exception):
-
-	CODE = [
-		"Nieprawidłowa wartość '{value}' przed linią {line}:{column}",
-		"Nieprawidłowy symbol '{value}' przed linią {line}:{column}",
-		"Oczekiwano {exps} natomiast napotkano {gots} przed linią {line}:{column}",
-		"Niezdefiniowana zmienna '{value}' przed linią {line}:{column}",
-		"Nieznana funkcja '{value}' przed linią {line}:{column}",
-		"Błąd funkcji '{value}' o treści '{text}' przed linią {line}:{column}",
-		"Nieprawidłowa liczba argumentów funkcji '{value}' przed linią {line}:{column}",
-		"Błąd '{text}' podczas wykonywania operacji '{a} {op} {b}' przed linią {line}:{column}",
-		"Nieoczekiwany koniec skryptu przed końcem wyrażenia po linii {line}:{column}",
-		"Wymuszone dzielenie przez zero przed linią {line}:{column}",
-	]
-
-	EXPS = {
-		_NUM: "wyrażenia",
-		_VAR: "zmiennej",
-		_FUN: "funkcji",
-		_END: "końca skryptu",
-	}
-
-	GOTS = {
-		_NUM: "wartość '%s'",
-		_VAR: "zmienną '%s'",
-		_FUN: "funkcję '%s'",
-		_END: "koniec skryptu",
-	}
-
-	UNKCODE = "Napotkano nieznany błąd"
-
-	def __init__(self, err, line, column, **params):
-
-		if 'exp' in params:
-			if params['exp'] in self.EXPS.keys():
-				es = self.EXPS[params['exp']]
-			else:
-				es = "'%s'" % params['exp']
-		else: es = None
-
-		if 'got' in params:
-			if params['got'] in (_NUM, _VAR, _FUN):
-				gs = self.GOTS[params['got']] % params['value']
-			elif params['got'] == _END:
-				gs = self.GOTS[params['got']]
-			else:
-				gs = "'%s'" % params['got']
-		else: gs = None
-
-		self.params = params
-		params['code'] = err
-		params['line'] = line
-		params['column'] = column
-
-		if err >= len(self.CODE): params['str'] = self.UNKCODE
-		else: params['str'] = self.CODE[err].format(**params, gots = gs, exps = es)
-
-		super().__init__(params)
-
-	def __str__(self): return self.params['str']
-
-	def dump(self): return self.params
 
 class script:
 
@@ -180,9 +119,9 @@ def analyze(text):
 	n = len(text)
 	i = 0
 
-	line = 1;
-	column = 0;
-	comment = False
+	lin = 1;
+	col = 0;
+	com = False
 
 	while i < n:
 
@@ -190,21 +129,21 @@ def analyze(text):
 
 		if c == "#":
 
-			comment = True
+			com = True
 			i += 1
 
 			continue
 
 		if c == "\n":
 
-			comment = False
-			line += 1
-			column = 0
+			com = False
+			lin += 1
+			col = 0
 			i += 1
 
 			continue
 
-		elif comment:
+		elif com:
 
 			i += 1
 
@@ -212,71 +151,71 @@ def analyze(text):
 
 		if c <= " ":
 
-			column += 1
+			col += 1
 			i += 1
 
 			continue
 
 		if c.isdigit():
 
-			value = 0
+			val = 0
 
 			while i < n and text[i].isdigit():
 
-				value = 10 * value + (ord(text[i]) - 48)
+				val = 10 * val + (ord(text[i]) - 48)
 
-				column += 1
+				col += 1
 				i += 1
 
 			if i < n and text[i] == ".":
 
-				column += 1
+				col += 1
 				i += 1
 
-				if i >= n or text[i] <= " ": raise error(_INV, line, column, value = f"{value}.")
-				if not text[i].isdigit(): raise error(_INV, line, column, value = f"{value}.{text[i]}")
+				if i >= n or text[i] <= " ": raise ValueError(_INV, lin, col, { 'value': f'{val}.' })
+				if not text[i].isdigit(): raise ValueError(_INV, lin, col, { 'value': f'{val}.{text[i]}'})
 
 				mul = 0.1
 
 				while i < n and text[i].isdigit():
 
-					value = value + mul * (ord(text[i]) - 48)
+					val = val + mul * (ord(text[i]) - 48)
 
 					mul *= 0.1
-					column += 1
+					col += 1
 					i += 1
 
-				tokens.append(nodus(_NUM, line, column, value))
+				tokens.append(nodus(_NUM, lin, col, val))
 
 				continue
 
 			if i < n and text[i] == ":":
 
-				hours = value
+				hh = val
 
-				column += 1
+				col += 1
 				i += 1
 
-				if i >= n or text[i] <= " ": raise error(_INV, line, column, value = f"{hours}:")
-				if not text[i].isdigit(): raise error(_INV, line, column, value = f"{hours}:{text[i]}")
+				if i >= n or text[i] <= " ": raise ValueError(_INV, lin, col, { 'value': f'{hh}:' })
+				if not text[i].isdigit(): raise ValueError(_INV, lin, col, { 'value': f'{hh}:{text[i]}' })
 
-				minutes = 0
-				digits = 0
+				mm = 0
+				dig = 0
 
 				while i < n and text[i].isdigit():
 
-					minutes = 10 * minutes + (ord(text[i]) - 48)
+					mm = 10 * mm + (ord(text[i]) - 48)
 
-					column += 1
+					col += 1
 					i += 1
-					digits += 1
+					dig += 1
 
-				if hours >= 24 or minutes >= 60: raise error(_INV, line, column, value = f"{hours}:{minutes:02d}")
-				if digits != 2: raise error(_INV, line, column, value = f"{hours}:{minutes}")
+				if hh >= 24 or mm >= 60: raise ValueError(_INV, lin, col, { 'value': f'{hh}:{mm}' })
+				if dig != 2: raise ValueError(_INV, lin, col, { 'value': f'{hh}:{mm}' })
 
-				value = hours * 60 + minutes
+				val = hh * 60 + mm
 
-			tokens.append(nodus(_NUM, line, column, value))
+			tokens.append(nodus(_NUM, lin, col, val))
 
 			continue
 
@@ -284,25 +223,25 @@ def analyze(text):
 
 			start = i
 			i += 1
-			column += 1
+			col += 1
 
 			while i < n:
 
 				c = text[i]
 
 				if c.isalpha() or c.isdigit() or c == "_":
-					column += 1
+					col += 1
 					i += 1
 
 				else: break
 
 			name = text[start:i]
 
-			if name == "in": tokens.append(nodus(name, line, column))
-			elif name == "not": tokens.append(nodus("!", line, column))
-			elif name == "and": tokens.append(nodus("&&", line, column))
-			elif name == "or": tokens.append(nodus("||", line, column))
-			else: tokens.append(nodus(_VAR, line, column, name))
+			if name == "in": tokens.append(nodus(name, lin, col))
+			elif name == "not": tokens.append(nodus("!", lin, col))
+			elif name == "and": tokens.append(nodus("&&", lin, col))
+			elif name == "or": tokens.append(nodus("||", lin, col))
+			else: tokens.append(nodus(_VAR, lin, col, name))
 
 			continue
 
@@ -312,25 +251,25 @@ def analyze(text):
 
 			if op in ("==", "!=", "<=", ">=", "&&", "||"):
 
-				tokens.append(nodus(op, line, column))
+				tokens.append(nodus(op, lin, col))
 
-				column += 2
+				col += 2
 				i += 2
 
 				continue
 
 		if c in "+-*/%^()<>!?:,":
 
-			tokens.append(nodus(c, line, column))
+			tokens.append(nodus(c, lin, col))
 
-			column += 1
+			col += 1
 			i += 1
 
 			continue
 
-		raise error(_INS, line, column, value = c)
+		raise SyntaxError(_INS, lin, col, { 'value': c })
 
-	tokens.append(nodus(_END, line, column))
+	tokens.append(nodus(_END, lin, col))
 
 	return tokens
 
@@ -346,7 +285,7 @@ def parse(tokens, pos = 0):
 		pos += 1
 
 		if expected is not None and token.typ != expected:
-			raise error(_EXP, token.row, token.col, exp = expected, got = token.typ, value = token.value)
+			raise SyntaxError(_EXP, token.row, token.col, { 'exp': expected, 'got': token.typ, 'value': token.value })
 
 		return token
 
@@ -533,9 +472,9 @@ def parse(tokens, pos = 0):
 			return node
 
 		if token.typ == ")":
-			raise error(_EXP, token.row, token.col, got = token.typ, exp = _NUM)
+			raise SyntaxError(_EXP, token.row, token.col, { 'got': token.typ, 'exp': _NUM })
 
-		raise error(_UEN, token.row, token.col)
+		raise SyntaxError(_UEN, token.row, token.col)
 
 	tree = expression()
 	take(_END)
@@ -554,20 +493,20 @@ def compute(node, var = None, fun = None):
 		if node.value in var: return var[node.value]
 		if node.value in CONSTS: return CONSTS[node.value]
 
-		raise error(_UNV, node.row, node.col, value = node.value)
+		raise NameError(_UNV, node.row, node.col, { 'value': node.value })
 
 	if node.typ == _FUN:
 
 		if node.value == "iif":
 
-			if len(node.children) != 3: raise error(_AGC, node.row, node.col, value = node.value)
+			if len(node.children) != 3: raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
 
 			if compute(node.children[0], var, fun): return compute(node.children[1], var, fun)
 			else: return compute(node.children[2], var, fun)
 
 		if node.value == "case":
 
-			if len(node.children) < 3 or len(node.children) % 2 == 0: raise error(_AGC, node.row, node.col, value = node.value)
+			if len(node.children) < 3 or len(node.children) % 2 == 0: raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
 
 			for i in range(0, len(node.children) - 1, 2):
 				if compute(node.children[i], var):
@@ -581,9 +520,9 @@ def compute(node, var = None, fun = None):
 			if node.value in fun: return fun[node.value](*args)
 			if node.value in FUNCTS: return FUNCTS[node.value](*args)
 
-		except Exception as e: raise error(_ERF, node.row, node.col, value = node.value, text = str(e))
+		except Exception as e: raise RuntimeError(_ERF, node.row, node.col, { 'value': node.value, 'text': str(e) })
 
-		raise error(_UNF, node.row, node.col, value = node.value)
+		raise NameError(_UNF, node.row, node.col, { 'value': node.value })
 
 	if node.typ == "!": return not compute(node.children[0], var, fun)
 
@@ -627,9 +566,9 @@ def compute(node, var = None, fun = None):
 		if node.typ == ">=": return a >= b
 
 	except Exception as e:
-		raise error(_OPE, node.row, node.col, text = str(e), a = a, b = b, op = node.typ)
+		raise RuntimeError(_OPE, node.row, node.col, { 'text': str(e), 'a': a, 'b': b, 'op': node.typ })
 
-	raise error(_INS, node.row, node.col, value = node.typ)
+	raise SyntaxError(_INS, node.row, node.col, { 'value': node.typ })
 
 def validate(text, var = None, fun = None):
 
@@ -647,23 +586,23 @@ def checknode(node, var = None, fun = None):
 
 	if node.typ == _VAR:
 		if node.value not in CONSTS and (var is None or node.value not in var):
-			raise error(_UNV, node.row, node.col, value = node.value)
+			raise NameError(_UNV, node.row, node.col, { 'value': node.value })
 
 	if node.typ == _FUN and node.value not in ( "iif", "case" ):
 		if node.value not in FUNCTS and (fun is None or node.value not in fun):
-			raise error(_UNF, node.row, node.col, value = node.value)
+			raise NameError(_UNF, node.row, node.col, { 'value': node.value })
 
 	if node.value == "iif":
 		if len(node.children) != 3:
-			raise error(_AGC, node.row, node.col, value = node.value)
+			raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
 
 	if node.value == "case":
 		if len(node.children) < 3 or len(node.children) % 2 == 0:
-			raise error(_AGC, node.row, node.col, value = node.value)
+			raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
 
 	if len(node.children) == 2 and(node.typ == "/" or node.typ == "%"):
 		if node.children[1].typ == _NUM and node.children[1].value == 0:
-			raise error(_ZDV, node.row, node.col)
+			raise ZeroDivisionError(_ZDV, node.row, node.col)
 
 	for n in node.children: checknode(n, var, fun)
 
@@ -677,3 +616,5 @@ def genreport(text, var = None, fun = None):
 	if isinstance(out, Exception): return out.args
 	elif out is True: return True
 	else: return False
+
+if _STR_ERROR: from perror import message

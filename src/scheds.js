@@ -252,22 +252,24 @@ function onCheck()
 				elab.title = "Skrypt jest niepoprawny";
 				bad++;
 			}
-			else if (typeof msg[0] === "object")
+			else if (typeof msg === "object" && msg.length >= 3)
 			{
 				const marker = document.createElement("div");
+				const message = trException(msg);
+
 				marker.textContent = "✖";
-				marker.title = msg[0].str;
+				marker.title = message;
 				marker.className = "error"
 
 				edits[id].clearGutter("errors");
 				edits[id].setGutterMarker(
-				    msg[0].line - 1,
+				    msg[1] - 1,
 				    "errors",
 				    marker
 				);
 
 				edits[id].getWrapperElement().classList.add("error");
-				elab.title = msg[0].str;
+				elab.title = message;
 				bad++;
 			}
 			else bad++;

@@ -110,7 +110,7 @@ function onLogs(data)
 			const time = new Date(item.t * 1000 + off);
 			const sdate = time.toLocaleTimeString('pl');
 
-			if (item.k == 'err') msg = messages['err'] + item.u + '"' + item.s + '"';
+			if (item.k == 'err') msg = messages['err'] + item.u;
 			else if (item.u == null) msg = messages[item.k][item.s];
 			else if (item.u == 'all') msg = messages[item.k][item.s] + messages[item.k]['all'];
 			else msg = messages[item.k][item.s] + messages[item.k]['one'] + item.u;
@@ -118,6 +118,8 @@ function onLogs(data)
 			if (msg == null) msg = errors['msg'];
 
 			const tr = document.createElement("tr");
+
+			if (item.k == 'err') tr.title = trException(item.s);
 
 			genCell(tr, sdate);
 			genCell(tr, msg);

@@ -18,13 +18,13 @@ with open("/etc/outs.json", "r") as f:
 	for k, p in load(f).items():
 		outs[k] = output(k, Pin(p, Pin.OUT), var)
 
-try: l = dthsens(DHT22(Pin(26)), 'tL', 'hL', var)
+try: l = dthsens(DHT22(Pin(26)), 'tL', 'hL', var, sens)
 except: l = None
-else: sens.update(l.sensors())
+else: l.update()
 
-try: p = dthsens(DHT22(Pin(25)), 'tP', 'hP', var)
+try: p = dthsens(DHT22(Pin(25)), 'tP', 'hP', var, sens)
 except: p = None
-else: sens.update(p.sensors())
+else: p.update()
 
 e = encoder(Pin(32, Pin.IN), Pin(33, Pin.IN))
 d = driver(outs, sens, var)

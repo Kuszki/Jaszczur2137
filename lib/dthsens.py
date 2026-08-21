@@ -7,7 +7,7 @@ class dthsens:
 
 	class __dummy: pass
 
-	def __init__(self, sens, tname, hname, var):
+	def __init__(self, sens, tname, hname, var, sen):
 
 		self.sens = sens
 		self.last = 0
@@ -23,6 +23,9 @@ class dthsens:
 		self.tsens = sensor(tname, self.tobj, var, 10)
 		self.hsens = sensor(hname, self.hobj, var, 10)
 
+		sen[tname] = self.tsens
+		sen[hname] = self.hsens
+
 	def update(self, now = None):
 
 		if now is None: now = time()
@@ -30,13 +33,6 @@ class dthsens:
 		if now - self.last >= 2:
 			self.sens.measure()
 			self.last = now
-
-	def sensors(self):
-
-		return {
-			self.tsens.id(): self.tsens,
-			self.hsens.id(): self.hsens,
-		}
 
 	def temperature(self): return self.tsens.value()
 

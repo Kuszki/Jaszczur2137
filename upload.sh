@@ -5,6 +5,7 @@ ROLE="server"
 
 PORT="ttyUSB0"
 EMIT="bytecode"
+OPTF="-O3"
 
 DO_FEECH=false
 DO_FLASH=false
@@ -43,6 +44,10 @@ while [ "$1" != "" ]; do
 			ROLE="none"
 			;;
 
+		-g | --debug)
+			OPTF="-O0"
+			;;
+
 	esac
 	shift
 
@@ -69,7 +74,7 @@ fi
 
 for f in lib/*.py
 do
-	mpy-cross -O3 -march=xtensawin -X emit="$EMIT" "$f"
+	mpy-cross "$OPTF" -march=xtensawin -X emit="$EMIT" "$f"
 done
 
 printf "{\n" > etc/etags.json

@@ -68,7 +68,6 @@ put lib/dthsens.mpy
 put lib/display.mpy
 put lib/encoder.mpy
 put lib/startup.mpy
-put lib/program.mpy
 
 put http/index.html
 put http/scheds.html

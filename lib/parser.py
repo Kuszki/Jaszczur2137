@@ -120,7 +120,7 @@ def analyze(text):
 	i = 0
 
 	lin = 1;
-	col = 0;
+	col = 1;
 	com = False
 
 	while i < n:
@@ -138,7 +138,7 @@ def analyze(text):
 
 			com = False
 			lin += 1
-			col = 0
+			col = 1
 			i += 1
 
 			continue

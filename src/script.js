@@ -4,6 +4,7 @@ CodeMirror.defineMode("script", function()
 	const keywords =
 	{
 		"in": true,
+		"is": true,
 		"not": true,
 		"and": true,
 		"or": true,

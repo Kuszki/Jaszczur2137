@@ -50,18 +50,9 @@ function trException(e)
 
 	if ("got" in e)
 	{
-		if (e.got >= 0 && e.got <= 2)
-		{
-			gots = GOTS[e.got].replace("{value}", e.value);
-		}
-		else if (e.got === 3)
-		{
-			gots = GOTS[e.got];
-		}
-		else
-		{
-			gots = `'${e.got}'`;
-		}
+		if (e.got >= 0 && e.got <= 2) gots = GOTS[e.got].replace("{value}", e.value);
+		else if (e.got == 3) gots = GOTS[e.got];
+		else gots = `'${e.got}'`;
 	}
 
 	const params = { ...e, exps, gots };

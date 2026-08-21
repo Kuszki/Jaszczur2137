@@ -13,8 +13,6 @@ _UEN = const(8); _ZDV = const(9);
 _NUM = const(0); _VAR = const(1);
 _FUN = const(2); _END = const(3);
 
-_STR_ERROR = const(False)
-
 CONSTS = {
 
 	"e": math.e,
@@ -53,11 +51,11 @@ FUNCTS = {
 
 class nodus:
 
-	def __init__(self, typ, row, col, value = None):
+	def __init__(self, typ, row, col, val = None):
 
 		self.typ = typ
-		self.value = value
-		self.children = []
+		self.val = val
+		self.chi = []
 
 		self.row = row
 		self.col = col
@@ -115,7 +113,7 @@ class script:
 
 def analyze(text):
 
-	tokens = list()
+	toks = list()
 	n = len(text)
 	i = 0
 
@@ -185,7 +183,7 @@ def analyze(text):
 					col += 1
 					i += 1
 
-				tokens.append(nodus(_NUM, lin, col, val))
+				toks.append(nodus(_NUM, lin, col, val))
 
 				continue
 
@@ -215,7 +213,7 @@ def analyze(text):
 
 				val = hh * 60 + mm
 
-			tokens.append(nodus(_NUM, lin, col, val))
+			toks.append(nodus(_NUM, lin, col, val))
 
 			continue
 
@@ -237,11 +235,12 @@ def analyze(text):
 
 			name = text[start:i]
 
-			if name == "in": tokens.append(nodus(name, lin, col))
-			elif name == "not": tokens.append(nodus("!", lin, col))
-			elif name == "and": tokens.append(nodus("&&", lin, col))
-			elif name == "or": tokens.append(nodus("||", lin, col))
-			else: tokens.append(nodus(_VAR, lin, col, name))
+			if name == "in": toks.append(nodus(name, lin, col))
+			elif name == "is": toks.append(nodus("==", lin, col))
+			elif name == "not": toks.append(nodus("!", lin, col))
+			elif name == "and": toks.append(nodus("&&", lin, col))
+			elif name == "or": toks.append(nodus("||", lin, col))
+			else: toks.append(nodus(_VAR, lin, col, name))
 
 			continue
 
@@ -251,7 +250,7 @@ def analyze(text):
 
 			if op in ("==", "!=", "<=", ">=", "&&", "||"):
 
-				tokens.append(nodus(op, lin, col))
+				toks.append(nodus(op, lin, col))
 
 				col += 2
 				i += 2
@@ -260,7 +259,7 @@ def analyze(text):
 
 		if c in "+-*/%^()<>!?:,":
 
-			tokens.append(nodus(c, lin, col))
+			toks.append(nodus(c, lin, col))
 
 			col += 1
 			i += 1
@@ -269,25 +268,25 @@ def analyze(text):
 
 		raise SyntaxError(_INS, lin, col, { 'value': c })
 
-	tokens.append(nodus(_END, lin, col))
+	toks.append(nodus(_END, lin, col))
 
-	return tokens
+	return toks
 
-def parse(tokens, pos = 0):
+def parse(toks, pos = 0):
 
 	def peek():
-		return tokens[pos]
+		return toks[pos]
 
 	def take(expected = None):
 
 		nonlocal pos
-		token = tokens[pos]
+		tok = toks[pos]
 		pos += 1
 
-		if expected is not None and token.typ != expected:
-			raise SyntaxError(_EXP, token.row, token.col, { 'exp': expected, 'got': token.typ, 'value': token.value })
+		if expected is not None and tok.typ != expected:
+			raise SyntaxError(_EXP, tok.row, tok.col, { 'exp': expected, 'got': tok.typ, 'value': tok.val })
 
-		return token
+		return tok
 
 	def expression():
 		return conditional()
@@ -298,7 +297,7 @@ def parse(tokens, pos = 0):
 
 		while peek().typ == "||":
 			op = take()
-			op.children = [node, conjunction()]
+			op.chi = [node, conjunction()]
 			node = op
 
 		return node
@@ -309,7 +308,7 @@ def parse(tokens, pos = 0):
 
 		while peek().typ == "&&":
 			op = take()
-			op.children = [node, comparison()]
+			op.chi = [node, comparison()]
 			node = op
 
 		return node
@@ -323,7 +322,7 @@ def parse(tokens, pos = 0):
 			true_expr = expression()
 			take(":")
 			false_expr = conditional()
-			op.children = [node, true_expr, false_expr]
+			op.chi = [node, true_expr, false_expr]
 			node = op
 
 		return node
@@ -342,11 +341,11 @@ def parse(tokens, pos = 0):
 
 				take("(")
 
-				op.children.append(left)
+				op.chi.append(left)
 
 				while True:
 
-					op.children.append(expression())
+					op.chi.append(expression())
 
 					if peek().typ != ",": break
 
@@ -369,19 +368,19 @@ def parse(tokens, pos = 0):
 
 		if len(comparisons) == 1:
 			op, a, b = comparisons[0]
-			op.children = [a, b]
+			op.chi = [a, b]
 
 			return op
 
 		first_op, a, b = comparisons[0]
-		first_op.children = [a, b]
+		first_op.chi = [a, b]
 		node = first_op
 
 		for op, a, b in comparisons[1:]:
-			op.children = [a, b]
+			op.chi = [a, b]
 
 			and_node = nodus("&&", op.row, op.col)
-			and_node.children = [node, op]
+			and_node.chi = [node, op]
 
 			node = and_node
 
@@ -393,7 +392,7 @@ def parse(tokens, pos = 0):
 
 		while peek().typ in ("+", "-"):
 			op = take()
-			op.children = [node, multiplication()]
+			op.chi = [node, multiplication()]
 			node = op
 
 		return node
@@ -404,7 +403,7 @@ def parse(tokens, pos = 0):
 
 		while peek().typ in ("*", "/", "%"):
 			op = take()
-			op.children = [node, power()]
+			op.chi = [node, power()]
 			node = op
 
 		return node
@@ -415,7 +414,7 @@ def parse(tokens, pos = 0):
 
 		if peek().typ == "^":
 			op = take()
-			op.children = [node, power()]
+			op.chi = [node, power()]
 			node = op
 
 		return node
@@ -425,7 +424,7 @@ def parse(tokens, pos = 0):
 		if peek().typ in ("!", "+", "-"):
 
 			op = take()
-			op.children = [unary()]
+			op.chi = [unary()]
 
 			return op
 
@@ -433,11 +432,11 @@ def parse(tokens, pos = 0):
 
 	def primary():
 
-		token = peek()
+		tok = peek()
 
-		if token.typ == _NUM: return take()
+		if tok.typ == _NUM: return take()
 
-		if token.typ == _VAR:
+		if tok.typ == _VAR:
 
 			ident = take()
 
@@ -458,12 +457,12 @@ def parse(tokens, pos = 0):
 
 			take(")")
 
-			call = nodus(_FUN, ident.row, ident.col, ident.value)
-			call.children = args
+			call = nodus(_FUN, ident.row, ident.col, ident.val)
+			call.chi = args
 
 			return call
 
-		if token.typ == "(":
+		if tok.typ == "(":
 
 			take("(")
 			node = expression()
@@ -471,10 +470,10 @@ def parse(tokens, pos = 0):
 
 			return node
 
-		if token.typ == ")":
-			raise SyntaxError(_EXP, token.row, token.col, { 'got': token.typ, 'exp': _NUM })
+		if tok.typ == ")":
+			raise SyntaxError(_EXP, tok.row, tok.col, { 'got': tok.typ, 'exp': _NUM })
 
-		raise SyntaxError(_UEN, token.row, token.col)
+		raise SyntaxError(_UEN, tok.row, tok.col)
 
 	tree = expression()
 	take(_END)
@@ -486,68 +485,68 @@ def compute(node, var = None, fun = None):
 	if var is None: var = dict()
 	if fun is None: fun = dict()
 
-	if node.typ == _NUM: return node.value
+	if node.typ == _NUM: return node.val
 
 	if node.typ == _VAR:
 
-		if node.value in var: return var[node.value]
-		if node.value in CONSTS: return CONSTS[node.value]
+		if node.val in var: return var[node.val]
+		if node.val in CONSTS: return CONSTS[node.val]
 
-		raise NameError(_UNV, node.row, node.col, { 'value': node.value })
+		raise NameError(_UNV, node.row, node.col, { 'value': node.val })
 
 	if node.typ == _FUN:
 
-		if node.value == "iif":
+		if node.val == "iif":
 
-			if len(node.children) != 3: raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
+			if len(node.chi) != 3: raise TypeError(_AGC, node.row, node.col, { 'value': node.val })
 
-			if compute(node.children[0], var, fun): return compute(node.children[1], var, fun)
-			else: return compute(node.children[2], var, fun)
+			if compute(node.chi[0], var, fun): return compute(node.chi[1], var, fun)
+			else: return compute(node.chi[2], var, fun)
 
-		if node.value == "case":
+		if node.val == "case":
 
-			if len(node.children) < 3 or len(node.children) % 2 == 0: raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
+			if len(node.chi) < 3 or len(node.chi) % 2 == 0: raise TypeError(_AGC, node.row, node.col, { 'value': node.val })
 
-			for i in range(0, len(node.children) - 1, 2):
-				if compute(node.children[i], var):
-					return compute(node.children[i + 1], var)
+			for i in range(0, len(node.chi) - 1, 2):
+				if compute(node.chi[i], var):
+					return compute(node.chi[i + 1], var)
 
-			return compute(node.children[-1], var)
+			return compute(node.chi[-1], var)
 
 		try:
-			args = [compute(arg, var, fun) for arg in node.children]
+			args = [compute(arg, var, fun) for arg in node.chi]
 
-			if node.value in fun: return fun[node.value](*args)
-			if node.value in FUNCTS: return FUNCTS[node.value](*args)
+			if node.val in fun: return fun[node.val](*args)
+			if node.val in FUNCTS: return FUNCTS[node.val](*args)
 
-		except Exception as e: raise RuntimeError(_ERF, node.row, node.col, { 'value': node.value, 'text': str(e) })
+		except Exception as e: raise RuntimeError(_ERF, node.row, node.col, { 'value': node.val, 'text': str(e) })
 
-		raise NameError(_UNF, node.row, node.col, { 'value': node.value })
+		raise NameError(_UNF, node.row, node.col, { 'value': node.val })
 
-	if node.typ == "!": return not compute(node.children[0], var, fun)
+	if node.typ == "!": return not compute(node.chi[0], var, fun)
 
-	if node.typ == "+" and len(node.children) == 1: return compute(node.children[0], var, fun)
-	if node.typ == "-" and len(node.children) == 1: return -compute(node.children[0], var, fun)
+	if node.typ == "+" and len(node.chi) == 1: return compute(node.chi[0], var, fun)
+	if node.typ == "-" and len(node.chi) == 1: return -compute(node.chi[0], var, fun)
 
 	if node.typ == "?":
-		if compute(node.children[0], var, fun): return compute(node.children[1], var, fun)
-		else: return compute(node.children[2], var, fun)
+		if compute(node.chi[0], var, fun): return compute(node.chi[1], var, fun)
+		else: return compute(node.chi[2], var, fun)
 
-	if node.typ == "&&": return compute(node.children[0], var, fun) and compute(node.children[1], var, fun)
-	if node.typ == "||": return compute(node.children[0], var, fun) or compute(node.children[1], var, fun)
+	if node.typ == "&&": return compute(node.chi[0], var, fun) and compute(node.chi[1], var, fun)
+	if node.typ == "||": return compute(node.chi[0], var, fun) or compute(node.chi[1], var, fun)
 
 	if node.typ == "in":
 
-		value = compute(node.children[0], var)
+		value = compute(node.chi[0], var)
 
-		for child in node.children[1:]:
+		for child in node.chi[1:]:
 			if value == compute(child, var):
 				return True
 
 		return False
 
-	a = compute(node.children[0], var, fun)
-	b = compute(node.children[1], var, fun)
+	a = compute(node.chi[0], var, fun)
+	b = compute(node.chi[1], var, fun)
 
 	try:
 
@@ -585,26 +584,26 @@ def validate(text, var = None, fun = None):
 def checknode(node, var = None, fun = None):
 
 	if node.typ == _VAR:
-		if node.value not in CONSTS and (var is None or node.value not in var):
-			raise NameError(_UNV, node.row, node.col, { 'value': node.value })
+		if node.val not in CONSTS and (var is None or node.val not in var):
+			raise NameError(_UNV, node.row, node.col, { 'value': node.val })
 
-	if node.typ == _FUN and node.value not in ( "iif", "case" ):
-		if node.value not in FUNCTS and (fun is None or node.value not in fun):
-			raise NameError(_UNF, node.row, node.col, { 'value': node.value })
+	if node.typ == _FUN and node.val not in ( "iif", "case" ):
+		if node.val not in FUNCTS and (fun is None or node.val not in fun):
+			raise NameError(_UNF, node.row, node.col, { 'value': node.val })
 
-	if node.value == "iif":
-		if len(node.children) != 3:
-			raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
+	if node.val == "iif":
+		if len(node.chi) != 3:
+			raise TypeError(_AGC, node.row, node.col, { 'value': node.val })
 
-	if node.value == "case":
-		if len(node.children) < 3 or len(node.children) % 2 == 0:
-			raise TypeError(_AGC, node.row, node.col, { 'value': node.value })
+	if node.val == "case":
+		if len(node.chi) < 3 or len(node.chi) % 2 == 0:
+			raise TypeError(_AGC, node.row, node.col, { 'value': node.val })
 
-	if len(node.children) == 2 and(node.typ == "/" or node.typ == "%"):
-		if node.children[1].typ == _NUM and node.children[1].value == 0:
+	if len(node.chi) == 2 and(node.typ == "/" or node.typ == "%"):
+		if node.chi[1].typ == _NUM and node.chi[1].val == 0:
 			raise ZeroDivisionError(_ZDV, node.row, node.col)
 
-	for n in node.children: checknode(n, var, fun)
+	for n in node.chi: checknode(n, var, fun)
 
 	return True
 
@@ -617,4 +616,5 @@ def genreport(text, var = None, fun = None):
 	elif out is True: return True
 	else: return False
 
-if _STR_ERROR: from perror import message
+try: from perror import message
+except: message = lambda e: str(e)

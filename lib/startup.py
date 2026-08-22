@@ -33,6 +33,7 @@ s = server(80)
 
 s.defsite('outputs.json', lambda v: dumps(d.get_outputs()))
 s.defsite('sensors.json', lambda v: dumps(d.get_sensors()))
+s.defsite('variables.json', lambda v: dumps(d.get_variables()))
 s.defsite('prefs.json', lambda v: dumps(d.get_params()))
 s.defsite('tasks.json', lambda v: dumps(d.get_tasks()))
 s.defsite('history.json', lambda v: dumps(d.get_hist()))

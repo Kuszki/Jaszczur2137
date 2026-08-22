@@ -30,6 +30,8 @@ class output:
 
 	def update(self, state = None, driver = None, script = None):
 
+		if state is not None and state < 0: state = self.vde
+
 		if script is not None and self.script() != script:
 			self.code.update(script)
 			self.cha = True

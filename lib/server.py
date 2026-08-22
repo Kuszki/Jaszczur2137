@@ -9,6 +9,17 @@ class server:
 
 	def __init__(self, port = 80):
 
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		self.sock.bind(socket.getaddrinfo("0.0.0.0", port)[0][-1])
+		self.sock.listen(25)
+
+		self.poll = select.poll()
+		self.poll.register(self.sock, select.POLLIN)
+
+		self.sites = dict()
+
 		try:
 			with open('/etc/users.json', 'r') as f:
 				self.users = json.load(f)
@@ -25,16 +36,6 @@ class server:
 		finally:
 			gc.collect()
 
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.sock.bind(socket.getaddrinfo("0.0.0.0", port)[0][-1])
-		self.sock.listen(25)
-
-		self.poll = select.poll()
-		self.poll.register(self.sock, select.POLLIN)
-
-		self.sites = dict()
 
 	def accept(self, wait = 1000, timeout = 3):
 
@@ -46,9 +47,7 @@ class server:
 
 			try: self.recv(s)
 			except: return False
-			finally:
-				s.close()
-				gc.collect()
+			finally: s.close()
 
 			return True
 

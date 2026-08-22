@@ -391,6 +391,10 @@ class driver:
 
 		return out
 
+	def get_variables(self):
+
+		return self.var
+
 	def get_devinfo(self):
 
 		try: tmp = esp32.raw_temperature()
@@ -637,14 +641,14 @@ class driver:
 
 			for o in self.outs.values():
 				if not o.driver(): continue
+				else: old = new = None
 
 				try:
 					old = o.status()
 					new = o.compute()
 				except Exception as e:
 					self.save_logs('err', o.name(), e.args)
-					o.update(driver = False, state = o.default())
-					old = new = None
+					o.update(driver = False, state = -1)
 				finally:
 					gc.collect()
 

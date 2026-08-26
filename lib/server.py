@@ -47,6 +47,7 @@ class server:
 
 			try: self.recv(s)
 			except: return False
+			else: gc.collect()
 			finally: s.close()
 
 			return True

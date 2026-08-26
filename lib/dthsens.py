@@ -9,8 +9,12 @@ class dthsens:
 
 	def __init__(self, sens, tname, hname, var, sen):
 
+		try: sens.measure()
+		except:
+			raise ValueError('no sensor')
+
 		self.sens = sens
-		self.last = 0
+		self.last = time()
 
 		self.tobj = self.__dummy()
 		self.tobj.value = sens.temperature

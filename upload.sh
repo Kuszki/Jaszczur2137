@@ -70,6 +70,7 @@ then
 	esptool --chip esp32 --port "/dev/$PORT" erase-flash
 	sleep 1s
 	esptool --chip esp32 --port "/dev/$PORT" --baud 460800 write-flash --flash-size=detect -z 0x1000 esp32.bin
+	sleep 1s
 fi
 
 for f in lib/*.py

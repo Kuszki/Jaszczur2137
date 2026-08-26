@@ -20,15 +20,13 @@ with open("/etc/outs.json", "r") as f:
 
 try: l = dthsens(DHT22(Pin(26)), 'tL', 'hL', var, sens)
 except: l = None
-else: l.update()
 
 try: p = dthsens(DHT22(Pin(25)), 'tP', 'hP', var, sens)
 except: p = None
-else: p.update()
 
 e = encoder(Pin(32, Pin.IN), Pin(33, Pin.IN))
 d = driver(outs, sens, var)
-i = display(I2C(0, scl = Pin(18), sda = Pin(19)), Pin(27, Pin.IN), e, l, p, d.get_time)
+i = display(I2C(0), Pin(27, Pin.IN), e, l, p, d.get_time)
 s = server(80)
 
 s.defsite('outputs.json', lambda v: dumps(d.get_outputs()))

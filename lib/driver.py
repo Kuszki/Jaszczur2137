@@ -139,8 +139,6 @@ class driver:
 				with open(path, 'w') as f:
 					json.dump(v, f)
 
-			del v, path, data
-
 	def save_logs(self, k, u, s, now = None):
 
 		if now == None: now = time.time()
@@ -569,6 +567,26 @@ class driver:
 		if len(dels): self.save_tasks()
 
 	def on_hist(self, now):
+
+		for p in os.listdir('/var/'):
+
+			path = '/var/%s' % p
+
+			try:
+				with open(path, 'r') as f:
+					v = json.load(f)
+					n = len(v['data'])
+
+				if now - v['data'][-1]['t'] >= self.page: v['data'] = []
+				else:
+					while now - v['data'][0]['t'] >= self.page: v['data'].pop(0)
+
+				if not len(v['data']): os.remove(path)
+				elif n != len(v['data']):
+					with open(path, 'w') as f:
+						json.dump(v, f)
+
+			except: os.remove(path)
 
 		self.save_history(self.sens, now)
 		self.tp_save = now

@@ -275,7 +275,7 @@ class driver:
 
 				val = int(v['page'])
 
-				if 1 <= val <= 5:
+				if 1 <= val <= 10:
 					self.page = val * 86400
 					self.psize = int(self.page / self.ptime)
 					self.tp_save = 0
